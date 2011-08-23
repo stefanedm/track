@@ -1,0 +1,10 @@
+#!/usr/bin/perl
+@files = glob "*.bmp";
+$i = 1;
+foreach $file (@files) {
+	#next unless $file =~ /\d+
+	print "file $i : $file \n";
+
+	rename $file, "${i}.bmp";
+	$i++;
+}
