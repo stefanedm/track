@@ -39,35 +39,107 @@ char* itoa( int value, char* result, int base );
 
 int main(int argc, char *argv[])
 {
-    for(int i = 1 ; i< 518 ; i++){
-	stringstream stream;
-	stream << "pics/init/";
-	stream << i;
-	stream << ".bmp";
-	cout << "#### PICTURE NO. "<<i<<"####"<<endl;
-	cv::Mat init_Image = cvLoadImage(stream.str().c_str());
+    int j = 0;
 
-	cv::Size board(9,6);
-	std::vector<cv::Point2f> corners;
+    // Allocate Sotrage
+    std::vector<std::vector<cv::Point3f> > object_points;
+    std::vector<std::vector<cv::Point2f> > image_points;
 
-	bool found = cv::findChessboardCorners(init_Image,board,corners,CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
-	cv::drawChessboardCorners(init_Image,board,corners,1);
+    int numBoards = 40;
+    int numCornersHor = 9;
+    int numCornersVer = 6;
 
+    int numSquares = numCornersHor * numCornersVer;
+    cv::Size board_sz = cv::Size(numCornersVer, numCornersHor);
 
-	cv::imshow("Calib",init_Image);
-	cv::waitKey(1);
-    }
+    vector<cv::Point2f> corners;
+    int successes=0;
 
 
+    cv::Mat init_Image;
+
+	vector<cv::Point3f> obj;
+	for(int j=0;j<numSquares;j++)
+	    obj.push_back(cv::Point3f(j/numCornersHor, j%numCornersHor, 0.0f));
+
+	//while(successes<numBoards)
+	for(int i = 1 ; i< 241 ; i++){
+	    // every 10 pictures
+	    if(j != 5){
+		j++;
+		continue;
+	    } else {
+		j=0;
+	    }
+	    stringstream stream;
+	    stream << "pics/init/";
+	    stream << i;
+	    stream << ".bmp";
+	    cout << "#### PICTURE NO. "<<i<<"####"<<endl;
+	    init_Image = cvLoadImage(stream.str().c_str());
+	    cv::Mat grayImage;
+
+	    cv::cvtColor(init_Image, grayImage, CV_BGR2GRAY);
+	    bool found = cv::findChessboardCorners(init_Image, board_sz, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+
+	   if(found)
+	   {
+	       cv::cornerSubPix(grayImage, corners, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
+	       cv::drawChessboardCorners(grayImage, board_sz, corners, found);
+	   }
+
+	   cv::imshow("Calib1",init_Image);
+	   cv::imshow("Calib2",grayImage);
+
+	   int key = cv::waitKey(1);
+	   if(key==27)
+	       return 0;
+
+	    if(found!=0)
+	    {
+		image_points.push_back(corners);
+		object_points.push_back(obj);
+		printf("Snap stored!\n");
+
+		successes++;
+
+		if(successes>=numBoards)
+		    break;
+	    }
+
+	}
+
+	cv::Mat intrinsic = cv::Mat(3, 3, CV_32FC1);
+	cv::Mat distCoeffs;
+	vector<cv::Mat> rvecs;
+	vector<cv::Mat> tvecs;
+
+	intrinsic.ptr<float>(0)[0] = 1.0;
+	intrinsic.ptr<float>(1)[1] = 1.0;
+
+	intrinsic.ptr<float>(0)[2] = 1.0;
+	intrinsic.ptr<float>(1)[2] = 1.0;
+
+	cout << "SIZE:: " << init_Image.size().height << " _ " << init_Image.size().width<<endl;
+
+	calibrateCamera(object_points, image_points, init_Image.size(), intrinsic, distCoeffs, rvecs, tvecs,CV_CALIB_USE_INTRINSIC_GUESS);
+
+	cout << "##INTRINSIC##" <<endl;
+	cout << intrinsic.ptr<float>(0)[0] << " " <<intrinsic.ptr<float>(0)[1]<<" " <<intrinsic.ptr<float>(0)[2]<< endl;
+	cout << intrinsic.ptr<float>(1)[0] << " " <<intrinsic.ptr<float>(1)[1]<< " " <<intrinsic.ptr<float>(1)[2] << endl;
+	cout << intrinsic.ptr<float>(2)[0] << " " <<intrinsic.ptr<float>(2)[1]<< " " <<intrinsic.ptr<float>(2)[2] << endl;
+
+	//cvSave( "Intrinsics.xml", intrinsic.ptr() );
+
+	// Save the intrinsics and distortions
+	//cv::
+	//cv::Save( "Intrinsics.xml", intrinsic );
+	//cv::Save( "Distortion.xml", distCoeffs);
 
 
 
 
-    //cout << "Corners found : " << found <<endl;
 
-
-    //cv::imshow("Calib",init_Image);
-    //cv::waitKey();
 
     return 0;
     // ar test
