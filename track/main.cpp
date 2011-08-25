@@ -39,13 +39,14 @@ char* itoa( int value, char* result, int base );
 
 int main(int argc, char *argv[])
 {
-    int j = 0;
+
+    /*int j = 0;
 
     // Allocate Sotrage
     std::vector<std::vector<cv::Point3f> > object_points;
     std::vector<std::vector<cv::Point2f> > image_points;
 
-    int numBoards = 40;
+    int numBoards = 20;
     int numCornersHor = 9;
     int numCornersVer = 6;
 
@@ -59,13 +60,20 @@ int main(int argc, char *argv[])
     cv::Mat init_Image;
 
 	vector<cv::Point3f> obj;
-	for(int j=0;j<numSquares;j++)
-	    obj.push_back(cv::Point3f(j/numCornersHor, j%numCornersHor, 0.0f));
+	for(int y(0); y < numCornersHor; ++y) {
+	    double tmp (y * 60.0);
+	    for(int x(0); x < numCornersVer; ++x){
+		obj.push_back(cv::Point3f(x * 60.0, tmp, 0));
+		cout << "::" <<   x * 60.0 << " - " << tmp << endl;
+	    }
+	}
 
-	//while(successes<numBoards)
-	for(int i = 1 ; i< 241 ; i++){
+	//cv::VideoCapture capture = cv::VideoCapture(0);
+
+	//while(successes < numBoards){
+	for(int i = 1 ; i< 518 ; i++){
 	    // every 10 pictures
-	    if(j != 5){
+	    if(j != 1){
 		j++;
 		continue;
 	    } else {
@@ -75,169 +83,151 @@ int main(int argc, char *argv[])
 	    stream << "pics/init/";
 	    stream << i;
 	    stream << ".bmp";
-	    cout << "#### PICTURE NO. "<<i<<"####"<<endl;
+	    cout << "#### PICTURE NO. "<<i<<"####" << stream.str().c_str() <<endl;
 	    init_Image = cvLoadImage(stream.str().c_str());
 	    cv::Mat grayImage;
+	    //capture >> init_Image;
 
 	    cv::cvtColor(init_Image, grayImage, CV_BGR2GRAY);
-	    bool found = cv::findChessboardCorners(init_Image, board_sz, corners, CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS);
+	    bool found = cv::findChessboardCorners(grayImage, board_sz, corners, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE);
 
-	   if(found)
-	   {
-	       cv::cornerSubPix(grayImage, corners, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
-	       cv::drawChessboardCorners(grayImage, board_sz, corners, found);
-	   }
-
-	   cv::imshow("Calib1",init_Image);
-	   cv::imshow("Calib2",grayImage);
-
-	   int key = cv::waitKey(1);
-	   if(key==27)
-	       return 0;
-
-	    if(found!=0)
+	    if(found)
 	    {
+		cv::cornerSubPix(grayImage, corners, cv::Size(11, 11), cv::Size(-1, -1), cv::TermCriteria(CV_TERMCRIT_EPS | CV_TERMCRIT_ITER, 30, 0.1));
+		cv::drawChessboardCorners(grayImage, board_sz, corners, found);
+
 		image_points.push_back(corners);
 		object_points.push_back(obj);
-		printf("Snap stored!\n");
 
+		cout << "Snap stored!" << endl;
 		successes++;
 
 		if(successes>=numBoards)
 		    break;
 	    }
 
-	}
+	   cv::imshow("Calib1",init_Image);
+	   cv::imshow("Calib2",grayImage);
 
-	cv::Mat intrinsic = cv::Mat(3, 3, CV_32FC1);
+	   int key = cv::waitKey(1);
+
+
+	}
+	cout << "image point size : " << image_points.size() << endl;
+	cout << "object point size : " << object_points.size() << endl;
+
 	cv::Mat distCoeffs;
 	vector<cv::Mat> rvecs;
 	vector<cv::Mat> tvecs;
 
-	intrinsic.ptr<float>(0)[0] = 1.0;
-	intrinsic.ptr<float>(1)[1] = 1.0;
+	cv::Mat intrinsic;
 
-	intrinsic.ptr<float>(0)[2] = 1.0;
-	intrinsic.ptr<float>(1)[2] = 1.0;
-
-	cout << "SIZE:: " << init_Image.size().height << " _ " << init_Image.size().width<<endl;
-
-	calibrateCamera(object_points, image_points, init_Image.size(), intrinsic, distCoeffs, rvecs, tvecs,CV_CALIB_USE_INTRINSIC_GUESS);
+	cv::calibrateCamera(object_points, image_points, init_Image.size(), intrinsic, distCoeffs, rvecs, tvecs);
 
 	cout << "##INTRINSIC##" <<endl;
-	cout << intrinsic.ptr<float>(0)[0] << " " <<intrinsic.ptr<float>(0)[1]<<" " <<intrinsic.ptr<float>(0)[2]<< endl;
-	cout << intrinsic.ptr<float>(1)[0] << " " <<intrinsic.ptr<float>(1)[1]<< " " <<intrinsic.ptr<float>(1)[2] << endl;
-	cout << intrinsic.ptr<float>(2)[0] << " " <<intrinsic.ptr<float>(2)[1]<< " " <<intrinsic.ptr<float>(2)[2] << endl;
+	cout << intrinsic.ptr<double>(0)[0] << " " <<intrinsic.ptr<double>(0)[1]<<" " <<intrinsic.ptr<double>(0)[2]<< endl;
+	cout << intrinsic.ptr<double>(1)[0] << " " <<intrinsic.ptr<double>(1)[1]<< " " <<intrinsic.ptr<double>(1)[2] << endl;
+	cout << intrinsic.ptr<double>(2)[0] << " " <<intrinsic.ptr<double>(2)[1]<< " " <<intrinsic.ptr<double>(2)[2] << endl;
 
-	//cvSave( "Intrinsics.xml", intrinsic.ptr() );
-
-	// Save the intrinsics and distortions
-	//cv::
-	//cv::Save( "Intrinsics.xml", intrinsic );
-	//cv::Save( "Distortion.xml", distCoeffs);
-
-
-
-
-
-
-    return 0;
+	cout << "##DISTORTION##" <<endl;
+	cout << distCoeffs.ptr<double>(0)[0] << " " << distCoeffs.ptr<double>(0)[1] << " " << distCoeffs.ptr<double>(0)[2] << " "
+		<< distCoeffs.ptr<double>(0)[3] << " " << distCoeffs.ptr<double>(0)[4] << " " << distCoeffs.ptr<double>(0)[5] << " "  <<endl;
+*/
     // ar test
 
-    char           *cparam_name    = "pics/camera_para.dat";
-    ARParam         cparam;
-    ARParam  wparam;
+    const char    *cparam_name    = "pics/camera_para.dat";
+    ARParam cparam;
+    ARParam wparam;
 
-   // return 0;
     // opencv-test
-    IplImage* frame;
+    IplImage*	frame;
+    char	*patt_name      = "davit.patt";
 
-    IplImage* grey = NULL;
-
-    IplImage* edges = NULL;
-
-    char    *patt_name      = "davit.patt";
-
-    int key(0);
+    //int key(0);
 
     cv::VideoCapture capture = 0;
     std::cout << QDir::currentPath().toStdString() << endl;
-    if(!capture.open("test.avi"))
-	return 1;
+   // if(!capture.open("test.avi"))
+	//return 1;
     cv::Mat m,n;
     cv::namedWindow("looky looky");
 
     ARUint8  *dataPtr;
-
     int patt_id;
     if( (patt_id=arLoadPatt(patt_name)) < 0 ) {
 	cout << "Pattern load error" <<endl;
+    } else {
+	cout << "Pattern loaded... "<<endl;
     }
 
     /* set the initial camera parameters */
     if( arParamLoad(cparam_name, 1, &wparam) < 0 ) {
-	printf("Camera parameter load error !!\n");
+	cout << "Camera parameter load error !!"<<endl;
 	exit(0);
+    } else {
+	cout << "Loaded Camera Parameter !! "<<endl;
     }
-    arParamChangeSize( &wparam, 640, 480, &cparam );
+/*
+    wparam.xsize = 1280;
+    wparam.ysize = 1024;
+    wparam.mat[0][0] = 1598.0;
+    wparam.mat[1][1] = 1596.15;
+    wparam.mat[0][2] = 555.006;
+    wparam.mat[1][2] = 525.028;
+
+    wparam.dist_factor[0] = -0.477959;
+    wparam.dist_factor[1] = 1.83017;
+    wparam.dist_factor[2] = -0.0036001;
+    wparam.dist_factor[3] = -0.0001997;
+    cout <<"RESET..."<<endl;
+*/
+    arParamChangeSize( &wparam, 1280, 1024, &cparam );
     arInitCparam( &cparam );
-    printf("*** Camera Parameter ***\n");
+    cout << "*** Camera Parameter ***"<<endl;
     arParamDisp( &cparam );
-
+cv::Mat RGB;
+int v = 0;
     //while(capture.grab()){
-	//capture.retrieve(m);
-    for(int u=1;u<=100;++u){
+	//capture.retrieve(RGB);
+    //cout << "Starting loop..."<<endl;
+    for(int u=1;u<=200;++u){
+	//cout << "in loop..."<<endl;
+	stringstream stream;
+	stream << "pics/";
+	stream << u;
+	stream << ".bmp";
 
+	RGB = cv::imread(stream.str().c_str());
+	cv::flip(RGB,RGB,0);
 
-	frame = cvLoadImage("pics/test",3);
-	cv::Mat RGB(frame);
-	//cv::Mat RGB (m);
-	cv::Mat RGBA (RGB.rows,RGB.cols,CV_8UC4);
-	//cv::flip(RGB,RGB,0);
+	cv::Mat matAR(RGB.rows,RGB.cols,CV_8UC4);
+	cv::cvtColor(RGB,matAR,CV_BGR2BGRA);
 
-	cv::Mat ABGR(RGBA.rows,RGBA.cols, CV_8UC4);
-	cv::Mat alpha(RGB.rows,RGB.cols,CV_8UC1);
-	//convert RGBA to ABGR
-	cv::Mat in[] = {RGB,alpha};
-	cv::Mat out[] = {ABGR};
-	// RGBA[0] --> ABGR[3]
-	// RGBA[1] --> ABGR[2]
-	// RGBA[2] --> ABGR[1]
-	// RGBA[3] --> ARGB[0]
-	int from_to[] = {0,1,1,2,2,3,3,0};
-	//BGR = RGBA
-	cv::mixChannels(in,2,out,1,from_to,4);
+	cv::Mat newAR(RGB.rows,RGB.cols,CV_8UC4);
+
+	cv::Mat in[] = {matAR};
+	cv::Mat out[] = {newAR};
+	int from[] = {3,0,0,3,1,2,2,1};
+	cv::mixChannels(in,1,out,1,from,4);
+
+	dataPtr = (ARUint8*)newAR.data;
 
 	ARMarkerInfo    *marker_info;
 	int             marker_num;
 
-	if( (dataPtr = (ARUint8 *)ABGR.data) == NULL ) {
+	if( dataPtr == NULL ) {
 		arUtilSleep(2);
 		cout << "No Image data found...";
 		return 2;
 	}
 
-	/*ARUint8 *dataPtr = (ARUint8*) malloc(sizeof(ARUint8)*ABGR.cols*ABGR.rows*4);
-	int i = 0;
-	for(int y = 0;y < ABGR.rows;y++) {
-	    for(int x = 0; x < ABGR.cols; x++) {
-		for(int j = 0; j < 4;j++){
-		   // cout << "." << i;
-		    dataPtr[i++]  = ABGR.data[y*(ABGR.step/sizeof(uchar))+x*4+j];
-		}
-	    }
-	}
-	cout <<"ENDE"<<endl;
-*/
-
-	if( arDetectMarker(dataPtr, 100, &marker_info, &marker_num) < 0 ) {
+	cout << "try detecting..." <<endl;
+	if( arDetectMarker(dataPtr, 75, &marker_info, &marker_num) < 0 ) {
 	    cout << "No Markers found... :(";
 		//cleanup();
 		//exit(0);
 		return 4;
 	}
-
-	cout << "Marker found : " << marker_num << endl;
 
 	int j,k;
 	k = -1;
@@ -247,9 +237,27 @@ int main(int argc, char *argv[])
 		    else if( marker_info[k].cf < marker_info[j].cf ) k = j;
 		}
 	    }
-	    cout << "k: " << k << endl;
+	    //cout << "k: " << k << endl;
+	    double patt_width = 225.0;
+	    double patt_center[2] = {0.0,0.0};
+	    double patt_trans[3][4];
+	    if(marker_num > 0 && k == 0){
+		cout << "Marker found : " << marker_num << "  " << v++ << " - k: " << k <<endl;
+		arGetTransMat(&marker_info[k],patt_center,patt_width,patt_trans);
+		cout << patt_trans[0][0] << " " << patt_trans[0][1] << " " << patt_trans[0][2] << " " << patt_trans[0][3] << " "<<endl;
+		cout << patt_trans[1][0] << " " << patt_trans[1][1] << " " << patt_trans[1][2] << " " << patt_trans[1][3] << " "<<endl;
+		cout << patt_trans[2][0] << " " << patt_trans[2][1] << " " << patt_trans[2][2] << " " << patt_trans[2][3] << " "<<endl;
 
-	cv::imshow("looky looky",ABGR);
+		cout << "center: " << patt_center[0] << " - " << patt_center[1] <<endl;
+		//double pos[2] = marker_info[k].pos;
+		cout << "pos: " << (int)marker_info[k].pos[0] << " - " << marker_info[k].pos[1] <<endl;
+
+		cv::circle(RGB,cv::Point((int)marker_info[k].pos[0],(int)marker_info[k].pos[1]),10, CV_RGB(0,0,255));
+		cv::imwrite("fuck.bmp",RGB);
+		cv::waitKey(1);
+	    }
+
+	cv::imshow("looky looky",newAR);
 	cv::waitKey(1);
 	}
     //}
@@ -366,49 +374,4 @@ int setupGLUT(int *argc, char *argv[])
     return winid;
 }
 
-/**
-
- * C++ version char* style "itoa":
-
- */
-
-char* itoa( int value, char* result, int base ) {
-
-	// check that the base if valid
-
-	if (base < 2 || base > 16) { *result = 0; return result; }
-
-
-
-	char* out = result;
-
-	int quotient = value;
-
-
-
-	do {
-
-		*out = "0123456789abcdef"[ std::abs( quotient % base ) ];
-
-		++out;
-
-		quotient /= base;
-
-	} while ( quotient );
-
-
-
-	// Only apply negative sign for base 10
-
-	if ( value < 0 && base == 10) *out++ = '-';
-
-
-
-	std::reverse( result, out );
-
-	*out = 0;
-
-	return result;
-
-}
 
