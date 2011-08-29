@@ -140,15 +140,9 @@ int main(int argc, char *argv[])
     ARParam wparam;
 
     // opencv-test
-    IplImage*	frame;
     char	*patt_name      = "davit.patt";
 
-    //int key(0);
-
-    cv::VideoCapture capture = 0;
     std::cout << QDir::currentPath().toStdString() << endl;
-   // if(!capture.open("test.avi"))
-	//return 1;
     cv::Mat m,n;
     cv::namedWindow("looky looky");
 
@@ -181,16 +175,19 @@ int main(int argc, char *argv[])
     wparam.dist_factor[3] = -0.0001997;
     cout <<"RESET..."<<endl;
 */
-    arParamChangeSize( &wparam, 1280, 1024, &cparam );
+    arParamChangeSize( &wparam, 1920, 1080, &cparam );
     arInitCparam( &cparam );
     cout << "*** Camera Parameter ***"<<endl;
     arParamDisp( &cparam );
-cv::Mat RGB;
-int v = 0;
-    //while(capture.grab()){
-	//capture.retrieve(RGB);
-    //cout << "Starting loop..."<<endl;
-    for(int u=1;u<=200;++u){
+
+    //open file
+    fstream file;
+    file.open("1920x1080Data.dat",ios::out);
+
+    cv::Mat RGB;
+    int v = 0;
+    for(int u=1;u<=520;++u){
+	file<<"#FRAME_"<<u<<endl;
 	//cout << "in loop..."<<endl;
 	stringstream stream;
 	stream << "pics/";
@@ -198,7 +195,7 @@ int v = 0;
 	stream << ".bmp";
 
 	RGB = cv::imread(stream.str().c_str());
-	cv::flip(RGB,RGB,0);
+	//cv::flip(RGB,RGB,0);
 
 	cv::Mat matAR(RGB.rows,RGB.cols,CV_8UC4);
 	cv::cvtColor(RGB,matAR,CV_BGR2BGRA);
@@ -221,8 +218,8 @@ int v = 0;
 		return 2;
 	}
 
-	cout << "try detecting..." <<endl;
-	if( arDetectMarker(dataPtr, 75, &marker_info, &marker_num) < 0 ) {
+	cout << "try detecting... " << u <<endl;
+	if( arDetectMarker(dataPtr, 45, &marker_info, &marker_num) < 0 ) {
 	    cout << "No Markers found... :(";
 		//cleanup();
 		//exit(0);
@@ -242,82 +239,48 @@ int v = 0;
 	    double patt_center[2] = {0.0,0.0};
 	    double patt_trans[3][4];
 	    if(marker_num > 0 && k == 0){
-		cout << "Marker found : " << marker_num << "  " << v++ << " - k: " << k <<endl;
+		//cout << "Marker found : " << marker_num << "  " << v++ << " - k: " << k <<endl;
 		arGetTransMat(&marker_info[k],patt_center,patt_width,patt_trans);
-		cout << patt_trans[0][0] << " " << patt_trans[0][1] << " " << patt_trans[0][2] << " " << patt_trans[0][3] << " "<<endl;
-		cout << patt_trans[1][0] << " " << patt_trans[1][1] << " " << patt_trans[1][2] << " " << patt_trans[1][3] << " "<<endl;
-		cout << patt_trans[2][0] << " " << patt_trans[2][1] << " " << patt_trans[2][2] << " " << patt_trans[2][3] << " "<<endl;
+		file << patt_trans[0][0] << " " << patt_trans[0][1] << " " << patt_trans[0][2] << " " << patt_trans[0][3] << " "<<endl;
+		file << patt_trans[1][0] << " " << patt_trans[1][1] << " " << patt_trans[1][2] << " " << patt_trans[1][3] << " "<<endl;
+		file << patt_trans[2][0] << " " << patt_trans[2][1] << " " << patt_trans[2][2] << " " << patt_trans[2][3] << " "<<endl;
 
-		cout << "center: " << patt_center[0] << " - " << patt_center[1] <<endl;
-		//double pos[2] = marker_info[k].pos;
-		cout << "pos: " << (int)marker_info[k].pos[0] << " - " << marker_info[k].pos[1] <<endl;
+		//file << patt_center[0] << " " << patt_center[1] <<endl;
+		//cout << "patt width: " << patt_width <<endl;
 
-		cv::circle(RGB,cv::Point((int)marker_info[k].pos[0],(int)marker_info[k].pos[1]),10, CV_RGB(0,0,255));
-		cv::imwrite("fuck.bmp",RGB);
+
+		file << marker_info[k].pos[0] << " " << marker_info[k].pos[1] <<endl;
+
+		cv::line(newAR,cv::Point(marker_info[k].vertex[0][0],marker_info[k].vertex[0][1]),cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),CV_RGB(255,0,0));
+		cv::line(newAR,cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),CV_RGB(255,0,0));
+		cv::line(newAR,cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),cv::Point(marker_info[k].vertex[3][0],marker_info[k].vertex[3][1]),CV_RGB(255,0,0));
+		cv::line(newAR,cv::Point(marker_info[k].vertex[3][0],marker_info[k].vertex[3][1]),cv::Point(marker_info[k].vertex[0][0],marker_info[k].vertex[0][1]),CV_RGB(255,0,0));
+
+		cv::line(newAR,cv::Point(marker_info[k].vertex[0][0],marker_info[k].vertex[0][1]),cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),CV_RGB(255,0,0));
+		cv::line(newAR,cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),cv::Point(marker_info[k].vertex[3][0],marker_info[k].vertex[3][1]),CV_RGB(255,0,0));
+
+		cv::line(RGB,cv::Point(marker_info[k].vertex[0][0],marker_info[k].vertex[0][1]),cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),CV_RGB(255,0,0));
+		cv::line(RGB,cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),CV_RGB(255,0,0));
+		cv::line(RGB,cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),cv::Point(marker_info[k].vertex[3][0],marker_info[k].vertex[3][1]),CV_RGB(255,0,0));
+		cv::line(RGB,cv::Point(marker_info[k].vertex[3][0],marker_info[k].vertex[3][1]),cv::Point(marker_info[k].vertex[0][0],marker_info[k].vertex[0][1]),CV_RGB(255,0,0));
+
+		cv::line(RGB,cv::Point(marker_info[k].vertex[0][0],marker_info[k].vertex[0][1]),cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),CV_RGB(255,0,0));
+		cv::line(RGB,cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),cv::Point(marker_info[k].vertex[3][0],marker_info[k].vertex[3][1]),CV_RGB(255,0,0));
+
 		cv::waitKey(1);
 	    }
+	stringstream stream2;
+	stream2 << "pics/new/";
+	stream2 << u;
+	stream2 << ".bmp";
+	//cv::imwrite(stream2.str().c_str(),RGB);
 
-	cv::imshow("looky looky",newAR);
+	file<< "##"<<endl;
+	cv::imshow("looky looky",RGB);
 	cv::waitKey(1);
-	}
+    }
+    file.close();
     //}
-/*
-	if(!capture){
-
-	    return 1;
-
-	} else {
-	    cout << "Got capture... \n";
-	    //return 2;
-	}
-
-	int fps = (int)cvGetCaptureProperty(capture,CV_CAP_PROP_FPS);
-
-	cout << "fps: " << fps << "n";
-
-	cvNamedWindow("video", 0);
-
-	cout << "created window... \n";
-
-	while(key != 'q') {
-	    cout << "in loop... \n";
-
-	    frame = cvQueryFrame(capture);
-
-	    //cv::Mat tmp(frame);
-
-	    //cv::Mat tmp1(grey);
-
-	    cv::flip(frame, frame, 0);
-
-	    // start tracking
-
-	    //grey = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
-
-	    //edges = cvCreateImage(cvGetSize(frame), IPL_DEPTH_8U, 1);
-
-	    //cv::cvtColor(tmp,tmp1,CV_RGB2GRAY,0);
-
-	    //cvCvtColor(frame, grey, CV_BGR2GRAY);
-
-	    //cvCanny( grey, edges, 1.0, 1.0, 3);
-
-	    // finish
-
-	    if(!frame) break;
-
-	    cvShowImage("video",frame);
-
-	    key = cvWaitKey(1000/fps);
-
-	}
-	cout << "SHUT DOWN EVERYTHING!!!!!";
-
-	cvReleaseCapture(&capture);
-
-	cvDestroyWindow("video");
-
-*/
 
 
   //  QCoreApplication a(argc, argv);
