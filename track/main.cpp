@@ -1,13 +1,34 @@
-//#include <QtCore/QCoreApplication>
+#include <QtCore/QCoreApplication>
 
 
 // OPENSG INCLUDES
-//#include <OpenSG/OSGQT4WindowBase.h>
 #include <OpenSG/OSGConfig.h>
 #include <OpenSG/OSGGLUT.h>
-#include <OpenSG/OSGGLUTWindow.h>
 #include <OpenSG/OSGSimpleGeometry.h>
+#include <OpenSG/OSGGLUTWindow.h>
 #include <OpenSG/OSGSimpleSceneManager.h>
+#include <OpenSG/OSGSceneFileHandler.h>
+#include <OpenSG/OSGGroup.h>
+#include <OpenSG/OSGNode.h>
+#include <OpenSG/OSGNodePtr.h>
+#include <OpenSG/OSGGeometry.h>
+#include <OpenSG/OSGLineIterator.h>
+#include <OpenSG/OSGEdgeIterator.h>
+#include <OpenSG/OSGFaceIterator.h>
+#include <OpenSG/OSGTriangleIterator.h>
+#include <OpenSG/OSGVector.h>
+#include <OpenSG/OSGComponentTransform.h>
+#include <OpenSG/OSGPerspectiveCamera.h>
+#include <OpenSG/OSGGeoFunctions.h>
+#include <OpenSG/OSGSimpleMaterial.h>
+#include <OpenSG/OSGMaterial.h>
+#include <OpenSG/OSGGeoPropPtrs.h>
+
+#include <OpenSG/OSGChunkMaterial.h>
+#include <OpenSG/OSGMaterialChunk.h>
+#include <OpenSG/OSGPolygonChunk.h>
+#include <OpenSG/OSGLineChunk.h>
+
 
 // OPENCV INCLUDES
 #include <opencv2/opencv.hpp>
@@ -135,6 +156,7 @@ int main(int argc, char *argv[])
 */
     // ar test
 
+    /*
     const char    *cparam_name    = "pics/camera_para.dat";
     ARParam cparam;
     ARParam wparam;
@@ -154,27 +176,27 @@ int main(int argc, char *argv[])
 	cout << "Pattern loaded... "<<endl;
     }
 
-    /* set the initial camera parameters */
+    // set the initial camera parameters
     if( arParamLoad(cparam_name, 1, &wparam) < 0 ) {
 	cout << "Camera parameter load error !!"<<endl;
 	exit(0);
     } else {
 	cout << "Loaded Camera Parameter !! "<<endl;
     }
-/*
-    wparam.xsize = 1280;
-    wparam.ysize = 1024;
-    wparam.mat[0][0] = 1598.0;
-    wparam.mat[1][1] = 1596.15;
-    wparam.mat[0][2] = 555.006;
-    wparam.mat[1][2] = 525.028;
 
-    wparam.dist_factor[0] = -0.477959;
-    wparam.dist_factor[1] = 1.83017;
-    wparam.dist_factor[2] = -0.0036001;
-    wparam.dist_factor[3] = -0.0001997;
-    cout <<"RESET..."<<endl;
-*/
+    //wparam.xsize = 1280;
+    //wparam.ysize = 1024;
+    //wparam.mat[0][0] = 1598.0;
+    //wparam.mat[1][1] = 1596.15;
+    //wparam.mat[0][2] = 555.006;
+    //wparam.mat[1][2] = 525.028;
+
+    //wparam.dist_factor[0] = -0.477959;
+    //wparam.dist_factor[1] = 1.83017;
+    //wparam.dist_factor[2] = -0.0036001;
+    //wparam.dist_factor[3] = -0.0001997;
+    //cout <<"RESET..."<<endl;
+
     arParamChangeSize( &wparam, 1920, 1080, &cparam );
     arInitCparam( &cparam );
     cout << "*** Camera Parameter ***"<<endl;
@@ -280,33 +302,172 @@ int main(int argc, char *argv[])
 	cv::waitKey(1);
     }
     file.close();
+    */
     //}
 
 
   //  QCoreApplication a(argc, argv);
 
-   /* OSG::osgInit(argc,argv);
-    {
+	OSG::osgInit(argc,argv);
 	int winid = setupGLUT(&argc,argv);
-	OSG::GLUTWindowRecPtr gwin = OSG::GLUTWindow::create();
+	GLUTWindowPtr gwin = GLUTWindow::create();
 	gwin->setGlutId(winid);
 	gwin->init();
 
-	// This will be our whole scene for now : an incredible torus
-	OSG::NodeRecPtr scene = OSG::makeTorus(.5, 2, 16, 16);
+
+	OSG::NodePtr scene = SceneFileHandler::the().read("data/test2.obj");
+	//GroupPtr scene = GroupPtr::dcast(scene);
+
+
+	cout << "type: " << scene.getCore()->getTypeName()<< endl;
+
+	cout << "children in scene: " << scene->getNChildren()<<endl;
+
+	//for(int i(0);i < scene->getNChildren();++i)
+	//{
+/*		cout << "child no. "<<i<<endl;
+		cout << "type of child: "<<scene->getChild(i)->getTypeName()<<endl;
+		NodePtr child = scene->getChild(i);
+		cout << "children of child: " << child->getNChildren()<<endl;
+		cout << "type: " << child.getCore()->getTypeName()<<endl;
+*/		/*NodePtr child2 = child->getChild(0);
+		cout << "children of child2: " << child2->getNChildren()<<endl;
+		cout << "type: " << child2.getCore()->getTypeName()<<endl;
+		NodePtr child3 = child2->getChild(0);
+		cout << "children of child3: " << child3->getNChildren()<<endl;
+		cout << "type: " << child3.getCore()->getTypeName()<<endl;
+		NodePtr child4 = child3->getChild(0);
+		cout << "children of child4: " << child4->getNChildren()<<endl;
+		cout << "type: " << child4.getCore()->getTypeName()<<endl;
+*/
+		//NodePtr geo = child4;
+//		GeometryPtr geo = GeometryPtr::dcast(child->getCore());
+		GeometryPtr geo = GeometryPtr::dcast(scene->getCore());
+		FaceIterator it;
+
+		//calcFaceNormals(geo);
+		//GeoNormalsPtr normals = geo->getNormals();
+		int FUCK(0);
+
+		GeometryPtr geom = Geometry::create();
+		GeoPositions3fPtr pos = GeoPositions3f::create();
+		GeoNormals3fPtr norms = GeoNormals3f::create();
+GeoPLengthsPtr length = GeoPLengthsUI32::create();
+length->addValue(3);
+GeoPTypesPtr type = GeoPTypesUI8::create();
+type->addValue(GL_LINE);
+
+		for(it = geo->beginFaces(); it != geo->endFaces(); ++it)
+		{
+			std::cout << "Triangle " << it.getIndex() << ":" << std::endl;
+			std::cout << it.getPosition(0) << " " << it.getNormal(0) << std::endl;
+			std::cout << it.getPosition(1) << " " << it.getNormal(1) << std::endl;
+			std::cout << it.getPosition(2) << " " << it.getNormal(2) << std::endl;
+			cout << "_ " << it.getPositionIndex(0) << " # " << it.getPositionIndex(1) << " # " << it.getPositionIndex(2) <<endl;
+
+			FaceIterator sit;
+			int hits(0);
+			int test(0);
+/*
+			pos->addValue(it.getPosition(0));
+			pos->addValue(it.getPosition(1));
+			pos->addValue(it.getPosition(2));
+
+			norms->addValue(it.getNormal(0));
+			norms->addValue(it.getNormal(1));
+			norms->addValue(it.getNormal(2));*/
+			for(sit = geo->beginFaces(); sit != geo->endFaces();++sit)
+			{
+				if(it.getPositionIndex(0) == sit.getPositionIndex(0) ||
+					it.getPositionIndex(0) == sit.getPositionIndex(1) ||
+					it.getPositionIndex(0) == sit.getPositionIndex(2))
+					//cout << "same points in triangle no. "<<sit.getIndex()<<endl;
+											hits++;
+				if(it.getPositionIndex(1) == sit.getPositionIndex(0) ||
+					it.getPositionIndex(1) == sit.getPositionIndex(1) ||
+					it.getPositionIndex(1) == sit.getPositionIndex(2))
+						hits++;
+				//cout << "2 points: "<< hits<<endl;
+				/*if(it.getPositionIndex(2) == sit.getPositionIndex(0) ||
+					it.getPositionIndex(2) == sit.getPositionIndex(1) ||
+					it.getPositionIndex(2) == sit.getPositionIndex(2))
+						hits++;
+*/
+				//cout << "normal it: " <<it.getNormal() <<endl;
+				if(hits == 2 && sit.getIndex() != it.getIndex())
+				{
+				cout << "angle "<< it.getNormal(0).enclosedAngle(sit.getNormal(0)) <<endl;
+				if(it.getNormal(0).enclosedAngle(sit.getNormal(0)) < 0)
+					continue;
+
+				test++;
+					cout << "same line...! >> ["<<hits<<"]" << sit.getIndex() <<endl;
+					//cout << "normal sit: "<< sit.getNormal(<<endl;
+					if(test > 3){
+
+						cout << "FUCK!!"<<endl;FUCK++;
+
+						}
+
+
+				}
+				hits = 0;
+
+			}
+			//it.seek();
+
+			cout << ":: "<<FUCK<<endl;
+
+		}
+		geo->setTypes(type);
+		//geo->setLengths(length);
+		LineIterator lit;
+		int lines(0);
+		for(lit = geo->beginLines();lit != geo->endLines();++lit){
+			lines++;
+			cout << "pos1: " << lit.getPosition(0)<<endl;
+			cout << "pos2: " << lit.getPosition(1)<<endl;
+			cout << "wtf ?! "<<(lit.getPosition(0)).dist(lit.getPosition(1))<<endl;
+/*			if((lit.getPosition(0)).dist(lit.getPosition(1)) > 200){
+
+				pos->addValue(lit.getPosition(0));
+				pos->addValue(lit.getPosition(1));
+				//pos->addValue(it.getPosition(2));
+
+				norms->addValue(lit.getNormal(0));
+				norms->addValue(lit.getNormal(1));
+				//norms->addValue(it.getNormal(2));
+
+
+
+			}*/
+		}
+
+		//geo->setNormals(norms);
+		//geo->setPositions(pos);
+
+		cout << "lines: " << lines <<endl;
+
+	/*	PolygonChunkPtr chunk = PolygonChunk::create();
+		chunk->setFrontMode(GL_LINE);
+
+		ChunkMaterialPtr material = ChunkMaterial::create();
+		material->addChunk(chunk);
+*/SimpleMaterialPtr mat = SimpleMaterial::create();
+		geo->setMaterial(mat);
+
+	//}
+	//NodePtr	root = calcVertexNormalsGeo(geom, 1.0);
 
 	// Create and setup our little friend - the SSM
-	mgr = new OSG::SimpleSceneManager;
+	mgr = new SimpleSceneManager;
 	mgr->setWindow(gwin);
 	mgr->setRoot(scene);
+
 	mgr->showAll();
 
-
-	cout<<"wooooaaaaaahhh";
-    }
     glutMainLoop();
 
-    //return a.exec();*/
     return 0;
 }
 

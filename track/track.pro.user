@@ -12,7 +12,7 @@
    <value key="EditorConfiguration.Codec" type="QByteArray">System</value>
    <value key="EditorConfiguration.DoubleIndentBlocks" type="bool">false</value>
    <value key="EditorConfiguration.IndentBraces" type="bool">true</value>
-   <value key="EditorConfiguration.IndentSize" type="int">4</value>
+   <value key="EditorConfiguration.IndentSize" type="int">8</value>
    <value key="EditorConfiguration.MouseNavigation" type="bool">true</value>
    <value key="EditorConfiguration.PaddingMode" type="int">1</value>
    <value key="EditorConfiguration.ScrollWheelZooming" type="bool">true</value>
@@ -25,7 +25,7 @@
    <value key="EditorConfiguration.addFinalNewLine" type="bool">true</value>
    <value key="EditorConfiguration.cleanIndentation" type="bool">true</value>
    <value key="EditorConfiguration.cleanWhitespace" type="bool">true</value>
-   <value key="EditorConfiguration.inEntireDocument" type="bool">false</value>
+   <value key="EditorConfiguration.inEntireDocument" type="bool">true</value>
   </valuemap>
  </data>
  <data>
@@ -34,7 +34,7 @@
    <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">Desktop</value>
    <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString">Desktop</value>
    <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Target.DesktopTarget</value>
-   <value key="ProjectExplorer.Target.ActiveBuildConfiguration" type="int">1</value>
+   <value key="ProjectExplorer.Target.ActiveBuildConfiguration" type="int">0</value>
    <value key="ProjectExplorer.Target.ActiveDeployConfiguration" type="int">0</value>
    <value key="ProjectExplorer.Target.ActiveRunConfiguration" type="int">0</value>
    <valuemap key="ProjectExplorer.Target.BuildConfiguration.0" type="QVariantMap">
@@ -127,13 +127,15 @@
     </valuemap>
     <value key="ProjectExplorer.BuildConfiguration.BuildStepListCount" type="int">2</value>
     <value key="ProjectExplorer.BuildConfiguration.ClearSystemEnvironment" type="bool">false</value>
-    <valuelist key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges" type="QVariantList"/>
+    <valuelist key="ProjectExplorer.BuildConfiguration.UserEnvironmentChanges" type="QVariantList">
+     <value type="QString">PATH=/usr/bin:/opt/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/dbg</value>
+    </valuelist>
     <value key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName" type="QString">qmake 4.7.3 Debug</value>
     <value key="ProjectExplorer.ProjectConfiguration.DisplayName" type="QString"></value>
     <value key="ProjectExplorer.ProjectConfiguration.Id" type="QString">Qt4ProjectManager.Qt4BuildConfiguration</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildConfiguration" type="int">2</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.BuildDirectory" type="QString">/Users/stefanreinke/Diplomarbeit/impl/track/track</value>
-    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">7</value>
+    <value key="Qt4ProjectManager.Qt4BuildConfiguration.QtVersionId" type="int">5</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.ToolChain" type="QString">ProjectExplorer.ToolChain.Gcc:/usr/bin/g++.x86-macos-generic-mach_o-32bit.</value>
     <value key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild" type="bool">false</value>
    </valuemap>
