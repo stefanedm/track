@@ -23,6 +23,7 @@
 #include <OpenSG/OSGSimpleMaterial.h>
 #include <OpenSG/OSGMaterial.h>
 #include <OpenSG/OSGGeoPropPtrs.h>
+#include <OpenSG/OSGTransform.h>
 
 #include <OpenSG/OSGChunkMaterial.h>
 #include <OpenSG/OSGMaterialChunk.h>
@@ -57,6 +58,11 @@ OSG::SimpleSceneManager* mgr;
 using namespace std;
 int setupGLUT(int *argc, char *argv[]);
 char* itoa( int value, char* result, int base );
+void camera(void);
+
+GeometryPtr TEST;
+//angle of rotation
+float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 
 int main(int argc, char *argv[])
 {
@@ -315,7 +321,7 @@ int main(int argc, char *argv[])
 	gwin->init();
 
 
-	OSG::NodePtr scene = SceneFileHandler::the().read("data/test2.obj");
+	OSG::NodePtr scene = SceneFileHandler::the().read("data/test3_3.obj");
 	//GroupPtr scene = GroupPtr::dcast(scene);
 
 
@@ -345,19 +351,15 @@ int main(int argc, char *argv[])
 		GeometryPtr geo = GeometryPtr::dcast(scene->getCore());
 		FaceIterator it;
 
-		//calcFaceNormals(geo);
-		//GeoNormalsPtr normals = geo->getNormals();
 		int FUCK(0);
 
-		GeometryPtr geom = Geometry::create();
+//		GeometryPtr geom = Geometry::create();
 		GeoPositions3fPtr pos = GeoPositions3f::create();
 		GeoNormals3fPtr norms = GeoNormals3f::create();
-GeoPLengthsPtr length = GeoPLengthsUI32::create();
-length->addValue(3);
-GeoPTypesPtr type = GeoPTypesUI8::create();
-type->addValue(GL_LINE);
+		GeoPTypesPtr type = GeoPTypesUI8::create();
+		type->addValue(GL_LINE);
 
-		for(it = geo->beginFaces(); it != geo->endFaces(); ++it)
+/*		for(it = geo->beginFaces(); it != geo->endFaces(); ++it)
 		{
 			std::cout << "Triangle " << it.getIndex() << ":" << std::endl;
 			std::cout << it.getPosition(0) << " " << it.getNormal(0) << std::endl;
@@ -368,7 +370,7 @@ type->addValue(GL_LINE);
 			FaceIterator sit;
 			int hits(0);
 			int test(0);
-/*
+*//*
 			pos->addValue(it.getPosition(0));
 			pos->addValue(it.getPosition(1));
 			pos->addValue(it.getPosition(2));
@@ -376,7 +378,7 @@ type->addValue(GL_LINE);
 			norms->addValue(it.getNormal(0));
 			norms->addValue(it.getNormal(1));
 			norms->addValue(it.getNormal(2));*/
-			for(sit = geo->beginFaces(); sit != geo->endFaces();++sit)
+/*			for(sit = geo->beginFaces(); sit != geo->endFaces();++sit)
 			{
 				if(it.getPositionIndex(0) == sit.getPositionIndex(0) ||
 					it.getPositionIndex(0) == sit.getPositionIndex(1) ||
@@ -387,14 +389,14 @@ type->addValue(GL_LINE);
 					it.getPositionIndex(1) == sit.getPositionIndex(1) ||
 					it.getPositionIndex(1) == sit.getPositionIndex(2))
 						hits++;
-				//cout << "2 points: "<< hits<<endl;
+				//cout << "2 points: "<< hits<<endl;*/
 				/*if(it.getPositionIndex(2) == sit.getPositionIndex(0) ||
 					it.getPositionIndex(2) == sit.getPositionIndex(1) ||
 					it.getPositionIndex(2) == sit.getPositionIndex(2))
 						hits++;
 */
 				//cout << "normal it: " <<it.getNormal() <<endl;
-				if(hits == 2 && sit.getIndex() != it.getIndex())
+/*				if(hits == 2 && sit.getIndex() != it.getIndex())
 				{
 				cout << "angle "<< it.getNormal(0).enclosedAngle(sit.getNormal(0)) <<endl;
 				if(it.getNormal(0).enclosedAngle(sit.getNormal(0)) < 0)
@@ -414,50 +416,54 @@ type->addValue(GL_LINE);
 				hits = 0;
 
 			}
-			//it.seek();
-
 			cout << ":: "<<FUCK<<endl;
 
-		}
-		geo->setTypes(type);
-		//geo->setLengths(length);
+		}*/
+		//geo->setTypes(type);
+
 		LineIterator lit;
 		int lines(0);
+TEST = geo;
 		for(lit = geo->beginLines();lit != geo->endLines();++lit){
 			lines++;
-			cout << "pos1: " << lit.getPosition(0)<<endl;
-			cout << "pos2: " << lit.getPosition(1)<<endl;
-			cout << "wtf ?! "<<(lit.getPosition(0)).dist(lit.getPosition(1))<<endl;
-/*			if((lit.getPosition(0)).dist(lit.getPosition(1)) > 200){
+			//cout << "pos1: " << lit.getPosition(0)<<endl;
+			//cout << "pos2: " << lit.getPosition(1)<<endl;
+			//cout << "wtf ?! "<<(lit.getPosition(0)).dist(lit.getPosition(1))<<endl;
+			if((lit.getPosition(0)).dist(lit.getPosition(1)) > 1){
 
-				pos->addValue(lit.getPosition(0));
+			/*	pos->addValue(lit.getPosition(0));
 				pos->addValue(lit.getPosition(1));
 				//pos->addValue(it.getPosition(2));
 
 				norms->addValue(lit.getNormal(0));
 				norms->addValue(lit.getNormal(1));
 				//norms->addValue(it.getNormal(2));
-
-
-
-			}*/
+*/
+				//Geometry l = Geometry::create();
+				//l.g
+				cout << "GROßES BADABOOOM! >> "<<(lit.getPosition(0)).dist(lit.getPosition(1))<< endl;
+			}
 		}
 
 		//geo->setNormals(norms);
 		//geo->setPositions(pos);
 
 		cout << "lines: " << lines <<endl;
-
-	/*	PolygonChunkPtr chunk = PolygonChunk::create();
-		chunk->setFrontMode(GL_LINE);
-
-		ChunkMaterialPtr material = ChunkMaterial::create();
-		material->addChunk(chunk);
-*/SimpleMaterialPtr mat = SimpleMaterial::create();
+		SimpleMaterialPtr mat = SimpleMaterial::create();
 		geo->setMaterial(mat);
 
 	//}
 	//NodePtr	root = calcVertexNormalsGeo(geom, 1.0);
+		Matrix m;
+		m.setIdentity();
+	(scene->getCore())->accumulateMatrix(m);
+
+		Vec3f trans,scale;
+		Quaternion rot,scaleOri;
+		m.setTranslate(225,227,10422);
+		m.getTransform(trans,rot,scale,scaleOri);
+		cout << "values" << trans <<endl;
+
 
 	// Create and setup our little friend - the SSM
 	mgr = new SimpleSceneManager;
@@ -466,16 +472,29 @@ type->addValue(GL_LINE);
 
 	mgr->showAll();
 
+	//glutCreateWindow("test");
+
+
     glutMainLoop();
 
     return 0;
 }
 
 // react to size changes
-void reshape(int w, int h)
+/*void reshape(int w, int h)
 {
     mgr->resize(w, h);
     glutPostRedisplay();
+}*/
+
+void reshape (int w, int h) {
+	//glutPostRedisplay();
+    glViewport (0, 0, (GLsizei)w, (GLsizei)h); //set the viewport to the current window specifications
+    glMatrixMode (GL_PROJECTION); //set the matrix to projection
+
+    glLoadIdentity ();
+    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.0000001, 10000.0); //set the perspective (angle of sight, width, height, ,depth)
+    glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 }
 
 // just redraw our scene if this GLUT callback is invoked
@@ -483,6 +502,80 @@ void display(void)
 {
     mgr->redraw();
 }
+
+void renderScene(void) {
+
+	TriangleIterator ti;
+
+	glEnable(GL_DEPTH_TEST);
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	//glColor3f(0,0,0);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glBegin(GL_TRIANGLES);
+
+	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti){
+
+		float r = (float)rand() / (float)RAND_MAX;
+		float g = (float)rand() / (float)RAND_MAX;
+		float b = (float)rand() / (float)RAND_MAX;
+		//change
+
+		Pnt3f p1 = ti.getPosition(0);
+		Pnt3f p2 = ti.getPosition(1);
+		Pnt3f p3 = ti.getPosition(2);
+
+		glColor3f(r,g,b);
+		glVertex3f(p1[0],p1[1],p1[2]);
+		glVertex3f(p2[0],p2[1],p2[2]);
+		glVertex3f(p3[0],p3[1],p3[2]);
+
+		//glVertex3f(0.5,0.0,0.0);
+		//glVertex3f(0.0,0.5,0.0);
+	}
+
+	glEnd();
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_POLYGON_OFFSET_FILL);
+	glPolygonOffset(1.0, 1.0);
+	glColor3f(1,1,1);
+
+	//draw_object_with_filled_polygons();
+
+	glBegin(GL_TRIANGLES);
+	glColor3f(0,0,0);
+	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti){
+
+		//float r = (float)rand() / (float)RAND_MAX;
+		//float g = (float)rand() / (float)RAND_MAX;
+		//float b = (float)rand() / (float)RAND_MAX;
+		//change
+
+		Pnt3f p1 = ti.getPosition(0);
+		Pnt3f p2 = ti.getPosition(1);
+		Pnt3f p3 = ti.getPosition(2);
+
+		//glColor3f(r,g,b);
+		glVertex3f(p1[0],p1[1],p1[2]);
+		glVertex3f(p2[0],p2[1],p2[2]);
+		glVertex3f(p3[0],p3[1],p3[2]);
+
+		//glVertex3f(0.5,0.0,0.0);
+		//glVertex3f(0.0,0.5,0.0);
+	}
+	glEnd();
+	glDisable(GL_DEPTH_TEST);
+	//glLoadIdentity();
+
+	//glDisable(GL_POLYGON_OFFSET_FILL);*/
+
+	glutSwapBuffers();
+}
+
 
 int setupGLUT(int *argc, char *argv[])
 {
@@ -492,10 +585,14 @@ int setupGLUT(int *argc, char *argv[])
     int winid = glutCreateWindow("OpenSG First Application");
 
     // register the GLUT callback functions
-    glutDisplayFunc(display);
+    //glutDisplayFunc(display);
+    glutDisplayFunc(renderScene);
+//    glutIdleFunc(renderScene);
     glutReshapeFunc(reshape);
+
 
     return winid;
 }
+
 
 
