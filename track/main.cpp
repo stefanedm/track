@@ -59,6 +59,8 @@ using namespace std;
 int setupGLUT(int *argc, char *argv[]);
 char* itoa( int value, char* result, int base );
 void camera(void);
+void reshape(int w, int h);
+void renderScene();
 
 GeometryPtr TEST;
 //angle of rotation
@@ -316,9 +318,9 @@ int main(int argc, char *argv[])
 
 	OSG::osgInit(argc,argv);
 	int winid = setupGLUT(&argc,argv);
-	GLUTWindowPtr gwin = GLUTWindow::create();
-	gwin->setGlutId(winid);
-	gwin->init();
+	//GLUTWindowPtr gwin = GLUTWindow::create();
+	//gwin->setGlutId(winid);
+	//gwin->init();
 
 
 	OSG::NodePtr scene = SceneFileHandler::the().read("data/test3_3.obj");
@@ -454,26 +456,26 @@ TEST = geo;
 
 	//}
 	//NodePtr	root = calcVertexNormalsGeo(geom, 1.0);
-		Matrix m;
-		m.setIdentity();
-	(scene->getCore())->accumulateMatrix(m);
-
+		//Matrix m;
+		//m.setIdentity();
+	//(scene->getCore())->accumulateMatrix(m);
+/*
 		Vec3f trans,scale;
 		Quaternion rot,scaleOri;
 		m.setTranslate(225,227,10422);
 		m.getTransform(trans,rot,scale,scaleOri);
 		cout << "values" << trans <<endl;
-
+*/
 
 	// Create and setup our little friend - the SSM
 	mgr = new SimpleSceneManager;
-	mgr->setWindow(gwin);
-	mgr->setRoot(scene);
+	//mgr->setWindow(gwin);
+	//mgr->setRoot(scene);
 
-	mgr->showAll();
+	//mgr->showAll();
 
 	//glutCreateWindow("test");
-
+	reshape(1024,768);
 
     glutMainLoop();
 
@@ -487,14 +489,23 @@ TEST = geo;
     glutPostRedisplay();
 }*/
 
-void reshape (int w, int h) {
+void reshape (int w, int h)
+{
+	cout << "reshape ... ["<<w<<","<<h<<"]"<< endl;
 	//glutPostRedisplay();
     glViewport (0, 0, (GLsizei)w, (GLsizei)h); //set the viewport to the current window specifications
     glMatrixMode (GL_PROJECTION); //set the matrix to projection
 
-    glLoadIdentity ();
-    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.0000001, 10000.0); //set the perspective (angle of sight, width, height, ,depth)
+glLoadIdentity();
+    //gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.00000001, 1000.0); //set the perspective (angle of sight, width, height, ,depth)
+//    glLoadIdentity();
+    glTranslatef(0,-1.5,0);
+
     glMatrixMode (GL_MODELVIEW); //set the matrix back to model
+
+
+	//glViewport(0, 0, w, h);
+	//renderScene();
 }
 
 // just redraw our scene if this GLUT callback is invoked
@@ -504,76 +515,123 @@ void display(void)
 }
 
 void renderScene(void) {
+	cout << "render scene... "<<endl;
+	//reshape(1024,768);
 
 	TriangleIterator ti;
-
 	glEnable(GL_DEPTH_TEST);
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
-	//glColor3f(0,0,0);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glBegin(GL_TRIANGLES);
 
-	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti){
+	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
+	{
+		// create random color
+		int r = (int)rand() % 255;
+		//int g = (int)rand() / (int)RAND_MAX;
+		int g = (int)rand() % 255;
+		int b = (int)rand() % 255;
 
-		float r = (float)rand() / (float)RAND_MAX;
-		float g = (float)rand() / (float)RAND_MAX;
-		float b = (float)rand() / (float)RAND_MAX;
-		//change
+		cout << "r " << r << " g "<<g << " b "<<b<<endl;
 
+		// get points from triangle
 		Pnt3f p1 = ti.getPosition(0);
 		Pnt3f p2 = ti.getPosition(1);
 		Pnt3f p3 = ti.getPosition(2);
 
-		glColor3f(r,g,b);
+		//set color and add vertices
+		//glColor3f(r,g,b);
+		glColor3ub(r,g,b);
 		glVertex3f(p1[0],p1[1],p1[2]);
 		glVertex3f(p2[0],p2[1],p2[2]);
 		glVertex3f(p3[0],p3[1],p3[2]);
 
-		//glVertex3f(0.5,0.0,0.0);
-		//glVertex3f(0.0,0.5,0.0);
 	}
+/*	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
+	{
+		// create random color
+		float r = (float)rand() / (float)RAND_MAX;
+		float g = (float)rand() / (float)RAND_MAX;
+		float b = (float)rand() / (float)RAND_MAX;
 
+		// get points from triangle
+		Pnt3f p1 = ti.getPosition(0);
+		Pnt3f p2 = ti.getPosition(1);
+		Pnt3f p3 = ti.getPosition(2);
+
+		//set color and add vertices
+		glColor3f(r,g,b);
+		glVertex3f(p1[0],p1[1],p1[2]);
+		//glVertex3f(p2[0],p2[1],p2[2]);
+		glVertex3f(p3[0],p3[1],p3[2]);
+
+	}
+	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
+	{
+		// create random color
+		float r = (float)rand() / (float)RAND_MAX;
+		float g = (float)rand() / (float)RAND_MAX;
+		float b = (float)rand() / (float)RAND_MAX;
+
+		// get points from triangle
+		Pnt3f p1 = ti.getPosition(0);
+		Pnt3f p2 = ti.getPosition(1);
+		Pnt3f p3 = ti.getPosition(2);
+
+		//set color and add vertices
+		glColor3f(r,g,b);
+		//glVertex3f(p1[0],p1[1],p1[2]);
+		glVertex3f(p2[0],p2[1],p2[2]);
+		glVertex3f(p3[0],p3[1],p3[2]);
+
+	}*/
 	glEnd();
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_POLYGON_OFFSET_FILL);
 	glPolygonOffset(1.0, 1.0);
-	glColor3f(1,1,1);
-
-	//draw_object_with_filled_polygons();
 
 	glBegin(GL_TRIANGLES);
+	// set background color
 	glColor3f(0,0,0);
-	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti){
-
-		//float r = (float)rand() / (float)RAND_MAX;
-		//float g = (float)rand() / (float)RAND_MAX;
-		//float b = (float)rand() / (float)RAND_MAX;
-		//change
-
+	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
+	{
 		Pnt3f p1 = ti.getPosition(0);
 		Pnt3f p2 = ti.getPosition(1);
 		Pnt3f p3 = ti.getPosition(2);
 
-		//glColor3f(r,g,b);
 		glVertex3f(p1[0],p1[1],p1[2]);
 		glVertex3f(p2[0],p2[1],p2[2]);
 		glVertex3f(p3[0],p3[1],p3[2]);
-
-		//glVertex3f(0.5,0.0,0.0);
-		//glVertex3f(0.0,0.5,0.0);
 	}
 	glEnd();
+
 	glDisable(GL_DEPTH_TEST);
-	//glLoadIdentity();
 
-	//glDisable(GL_POLYGON_OFFSET_FILL);*/
+	//glutSwapBuffers();
+	int size = 1024*756*3;
+	//unsigned char pick_col[1024*756*3];
+	GLubyte *pixels = new GLubyte[size];
+	glReadPixels(0 , 0 , 1024 , 756 , GL_RGB , GL_UNSIGNED_BYTE , pixels);
+	int red,green,blue;
+	int count(0);
+	for(int u(0);u < size;u=u+3){
+		red = pixels[u];
+		green = pixels[u+1];
+		blue = pixels[u+2];
+		if(red != 0 && green != 0 && blue != 0){
+			count ++;
+			cout << "r: " << red << endl;
+			cout << "g: " << green << endl;
+			cout << "b: " << blue << endl;
+			cout << "=====" <<endl;
+		}
+	}
+	cout << "fucking triangle count : "<< count<<endl;
 
-	glutSwapBuffers();
+
 }
 
 
@@ -587,9 +645,9 @@ int setupGLUT(int *argc, char *argv[])
     // register the GLUT callback functions
     //glutDisplayFunc(display);
     glutDisplayFunc(renderScene);
-//    glutIdleFunc(renderScene);
+    //glutIdleFunc(renderScene);
     glutReshapeFunc(reshape);
-
+    glutReshapeWindow(1024,768);
 
     return winid;
 }
