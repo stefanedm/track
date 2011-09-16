@@ -527,12 +527,26 @@ void renderScene(void) {
 
 	glBegin(GL_TRIANGLES);
 
+	//map<int, vector<Pnt3f> > _COLORS;
+	map<int, int> _COLORS;
+
 	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
 	{
 		// create random color
 		int r = (int)rand() % 255;
 		int g = (int)rand() % 255;
 		int b = (int)rand() % 255;
+
+		// calculate index
+		int rgb_index = 256 * g + 256 * 256 * r + b;
+		//cout << rgb_index << endl;
+
+		// SAVE ALL _USED_ COLORS
+		vector<Pnt3f> v;
+		v.push_back(ti.getPosition(0));
+		v.push_back(ti.getPosition(1));
+		v.push_back(ti.getPosition(2));
+		_COLORS[rgb_index] = ti.getIndex();
 
 		//cout << "r " << r << " g "<<g << " b "<<b<<endl;
 
@@ -549,44 +563,6 @@ void renderScene(void) {
 		glVertex3f(p3[0],p3[1],p3[2]);
 
 	}
-/*	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
-	{
-		// create random color
-		float r = (float)rand() / (float)RAND_MAX;
-		float g = (float)rand() / (float)RAND_MAX;
-		float b = (float)rand() / (float)RAND_MAX;
-
-		// get points from triangle
-		Pnt3f p1 = ti.getPosition(0);
-		Pnt3f p2 = ti.getPosition(1);
-		Pnt3f p3 = ti.getPosition(2);
-
-		//set color and add vertices
-		glColor3f(r,g,b);
-		glVertex3f(p1[0],p1[1],p1[2]);
-		//glVertex3f(p2[0],p2[1],p2[2]);
-		glVertex3f(p3[0],p3[1],p3[2]);
-
-	}
-	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
-	{
-		// create random color
-		float r = (float)rand() / (float)RAND_MAX;
-		float g = (float)rand() / (float)RAND_MAX;
-		float b = (float)rand() / (float)RAND_MAX;
-
-		// get points from triangle
-		Pnt3f p1 = ti.getPosition(0);
-		Pnt3f p2 = ti.getPosition(1);
-		Pnt3f p3 = ti.getPosition(2);
-
-		//set color and add vertices
-		glColor3f(r,g,b);
-		//glVertex3f(p1[0],p1[1],p1[2]);
-		glVertex3f(p2[0],p2[1],p2[2]);
-		glVertex3f(p3[0],p3[1],p3[2]);
-
-	}*/
 	glEnd();
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -610,9 +586,9 @@ void renderScene(void) {
 
 	glDisable(GL_DEPTH_TEST);
 
-	//glutSwapBuffers();
+	glutSwapBuffers();
 
-	map<string,std::vector<int> > color_map;
+	map<int,std::vector<int> > color_map;
 
 	// window size
 	int size = 1024*756*3;
@@ -635,10 +611,6 @@ void renderScene(void) {
 		if(index == 0 )
 			continue;
 
-		// convert to string
-		std::stringstream out_s;
-		out_s << index;
-
 		// fill RGB vector
 		vector<int> ct;
 		ct.push_back(red);
@@ -646,7 +618,7 @@ void renderScene(void) {
 		ct.push_back(blue);
 
 		// put in map
-		color_map[out_s.str()] = ct;
+		color_map[index] = ct;
 		//debug output
 		/*if(red != 0 && green != 0 && blue != 0)
 		{
@@ -659,11 +631,111 @@ void renderScene(void) {
 	}
 	cout << "Colors seen in frame: "<< color_map.size()<<endl;
 
-	map<string,vector<int> >::iterator mip;
-	for(mip = color_map.begin();mip != color_map.end();mip++){
-		//cout << (mip->second)[0] <<endl;
-	}
+	map<int,vector<int> >::iterator mip;
+	// for all _visible_ triangles
+	int h(0);
+	FaceIterator fit = TEST->beginFaces();
+	float thresh = 0.95;
 
+	for(mip = color_map.begin();mip != color_map.end();mip++){
+		cout << "test new triangle" <<endl;
+		//cout << "color index: " << mip->first << endl;
+		//cout << "triangle points: " << (_COLORS[mip->first])[0] <<endl;
+
+		int face_index = _COLORS[mip->first];
+		fit.seek(face_index);
+
+		int a = fit.getPositionIndex(0);
+		int b = fit.getPositionIndex(1);
+		int c = fit.getPositionIndex(2);
+
+		FaceIterator nit;
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glBegin(GL_LINES);
+		glColor3f(1.0,0,0);
+		for(nit = TEST->beginFaces();nit != TEST->endFaces();++nit){
+			if(fit.getIndex() == nit.getIndex())
+				continue;
+			int a2 = nit.getPositionIndex(0);
+			int b2 = nit.getPositionIndex(1);
+			int c2 = nit.getPositionIndex(2);
+
+			if(a == a2 || a == b2 || a == c2)
+				if(b == a2 || b == b2 || b == c2){
+					cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
+					//cout << "angle: "<<fit.getNormal(0).enclosedAngle(nit.getNormal(0)) <<endl;
+					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
+						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
+						cout << "good"<<endl;
+					}
+					h++;
+				}
+
+			if(a == a2 || a == b2 || a == c2)
+				if(c == a2 || c == b2 || c == c2){
+					cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
+					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
+						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
+
+						cout << "good"<<endl;
+					}
+					h++;
+				}
+
+			if(c == a2 || c == b2 || c == c2)
+				if(b == a2 || b == b2 || b == c2){
+					cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
+					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
+						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
+
+						cout << "good"<<endl;
+					}
+					h++;
+				}
+		}
+		continue;
+		//Pnt3f p1 = (_COLORS[mip->first])[0];
+		//Pnt3f p2 = (_COLORS[mip->first])[1];
+		//Pnt3f p3 = (_COLORS[mip->first])[2];
+
+		map<int,vector<int> >::iterator mip2;
+
+		for(mip2 = color_map.begin();mip2 != color_map.end();mip2++)
+		{
+
+
+
+			/*for(int i(0);i<3;++i)
+			{
+				for(int j(0);j<3;++j)
+				{
+					Pnt3f x = (_COLORS[mip->first])[i%3];
+					Pnt3f y = (_COLORS[mip->first])[(i+1)%3];
+
+					if((_COLORS[mip->first])[i%3] == (_COLORS[mip2->first])[j%3] &&
+						(_COLORS[mip->first])[(i+1)%3]  == (_COLORS[mip2->first])[(j+1)%3] &&
+							(_COLORS[mip->first])[(i+2)%3] != (_COLORS[mip2->first])[(j+2)%3])
+					{
+
+					h++;
+					cout << "hmm?"<<endl;
+					}
+				}
+			}*/
+		}
+
+		// get triangle number
+		//vector<Pnt3f> Point = _COLORS[mip->first];
+		//cout << Point[0] << endl;
+
+	}
+	glEnd();
+	glutSwapBuffers();
+
+	cout << "number of same edges " << h <<endl;
 }
 
 
