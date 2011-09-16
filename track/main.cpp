@@ -619,16 +619,8 @@ void renderScene(void) {
 
 		// put in map
 		color_map[index] = ct;
-		//debug output
-		/*if(red != 0 && green != 0 && blue != 0)
-		{
-			count ++;
-			cout << "r: " << red << endl;
-			cout << "g: " << green << endl;
-			cout << "b: " << blue << endl;
-			cout << "=====" <<endl;
-		}*/
 	}
+
 	cout << "Colors seen in frame: "<< color_map.size()<<endl;
 
 	map<int,vector<int> >::iterator mip;
@@ -639,8 +631,6 @@ void renderScene(void) {
 
 	for(mip = color_map.begin();mip != color_map.end();mip++){
 		cout << "test new triangle" <<endl;
-		//cout << "color index: " << mip->first << endl;
-		//cout << "triangle points: " << (_COLORS[mip->first])[0] <<endl;
 
 		int face_index = _COLORS[mip->first];
 		fit.seek(face_index);
@@ -660,77 +650,37 @@ void renderScene(void) {
 			int b2 = nit.getPositionIndex(1);
 			int c2 = nit.getPositionIndex(2);
 
+			// a-b
 			if(a == a2 || a == b2 || a == c2)
 				if(b == a2 || b == b2 || b == c2){
-					cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
-					//cout << "angle: "<<fit.getNormal(0).enclosedAngle(nit.getNormal(0)) <<endl;
+					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
-						cout << "good"<<endl;
 					}
 					h++;
 				}
-
+			// a-c
 			if(a == a2 || a == b2 || a == c2)
 				if(c == a2 || c == b2 || c == c2){
-					cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
+					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
-
-						cout << "good"<<endl;
 					}
 					h++;
 				}
-
+			// c-b
 			if(c == a2 || c == b2 || c == c2)
 				if(b == a2 || b == b2 || b == c2){
-					cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
+					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
-
-						cout << "good"<<endl;
 					}
 					h++;
 				}
 		}
-		continue;
-		//Pnt3f p1 = (_COLORS[mip->first])[0];
-		//Pnt3f p2 = (_COLORS[mip->first])[1];
-		//Pnt3f p3 = (_COLORS[mip->first])[2];
-
-		map<int,vector<int> >::iterator mip2;
-
-		for(mip2 = color_map.begin();mip2 != color_map.end();mip2++)
-		{
-
-
-
-			/*for(int i(0);i<3;++i)
-			{
-				for(int j(0);j<3;++j)
-				{
-					Pnt3f x = (_COLORS[mip->first])[i%3];
-					Pnt3f y = (_COLORS[mip->first])[(i+1)%3];
-
-					if((_COLORS[mip->first])[i%3] == (_COLORS[mip2->first])[j%3] &&
-						(_COLORS[mip->first])[(i+1)%3]  == (_COLORS[mip2->first])[(j+1)%3] &&
-							(_COLORS[mip->first])[(i+2)%3] != (_COLORS[mip2->first])[(j+2)%3])
-					{
-
-					h++;
-					cout << "hmm?"<<endl;
-					}
-				}
-			}*/
-		}
-
-		// get triangle number
-		//vector<Pnt3f> Point = _COLORS[mip->first];
-		//cout << Point[0] << endl;
-
 	}
 	glEnd();
 	glutSwapBuffers();
