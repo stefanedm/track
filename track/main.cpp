@@ -1,5 +1,6 @@
 #include <QtCore/QCoreApplication>
 
+#include <map>
 
 // OPENSG INCLUDES
 #include <OpenSG/OSGConfig.h>
@@ -520,7 +521,7 @@ void renderScene(void) {
 
 	TriangleIterator ti;
 	glEnable(GL_DEPTH_TEST);
-	glPolygonMode(GL_FRONT_AND_BACK, GL_TRIANGLES);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -530,11 +531,10 @@ void renderScene(void) {
 	{
 		// create random color
 		int r = (int)rand() % 255;
-		//int g = (int)rand() / (int)RAND_MAX;
 		int g = (int)rand() % 255;
 		int b = (int)rand() % 255;
 
-		cout << "r " << r << " g "<<g << " b "<<b<<endl;
+		//cout << "r " << r << " g "<<g << " b "<<b<<endl;
 
 		// get points from triangle
 		Pnt3f p1 = ti.getPosition(0);
@@ -611,26 +611,58 @@ void renderScene(void) {
 	glDisable(GL_DEPTH_TEST);
 
 	//glutSwapBuffers();
+
+	map<string,std::vector<int> > color_map;
+
+	// window size
 	int size = 1024*756*3;
-	//unsigned char pick_col[1024*756*3];
+	// read pixels
 	GLubyte *pixels = new GLubyte[size];
 	glReadPixels(0 , 0 , 1024 , 756 , GL_RGB , GL_UNSIGNED_BYTE , pixels);
+
+	// init RGB and count&debug values
 	int red,green,blue;
 	int count(0);
+	//iterate through pixels
 	for(int u(0);u < size;u=u+3){
+		// get pixels
 		red = pixels[u];
 		green = pixels[u+1];
 		blue = pixels[u+2];
-		if(red != 0 && green != 0 && blue != 0){
+		// calc unique index
+		int index = 256 * green + 256 * 256 * red + blue;
+		// ignore black
+		if(index == 0 )
+			continue;
+
+		// convert to string
+		std::stringstream out_s;
+		out_s << index;
+
+		// fill RGB vector
+		vector<int> ct;
+		ct.push_back(red);
+		ct.push_back(green);
+		ct.push_back(blue);
+
+		// put in map
+		color_map[out_s.str()] = ct;
+		//debug output
+		/*if(red != 0 && green != 0 && blue != 0)
+		{
 			count ++;
 			cout << "r: " << red << endl;
 			cout << "g: " << green << endl;
 			cout << "b: " << blue << endl;
 			cout << "=====" <<endl;
-		}
+		}*/
 	}
-	cout << "fucking triangle count : "<< count<<endl;
+	cout << "Colors seen in frame: "<< color_map.size()<<endl;
 
+	map<string,vector<int> >::iterator mip;
+	for(mip = color_map.begin();mip != color_map.end();mip++){
+		//cout << (mip->second)[0] <<endl;
+	}
 
 }
 
