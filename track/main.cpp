@@ -352,9 +352,15 @@ int main(int argc, char *argv[])
 		//NodePtr geo = child4;
 //		GeometryPtr geo = GeometryPtr::dcast(child->getCore());
 		GeometryPtr geo = GeometryPtr::dcast(scene->getCore());
-		FaceIterator it;
 
-		int FUCK(0);
+		TransformPtr geo_transform = Transform::create();
+		Matrix m;
+		m.setIdentity();
+		m.setTranslate(0,0,-100);
+		geo_transform->setMatrix(m);
+
+
+		FaceIterator it;
 
 //		GeometryPtr geom = Geometry::create();
 		GeoPositions3fPtr pos = GeoPositions3f::create();
@@ -498,9 +504,13 @@ void reshape (int w, int h)
     glMatrixMode (GL_PROJECTION); //set the matrix to projection
 
 glLoadIdentity();
-    //gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.00000001, 1000.0); //set the perspective (angle of sight, width, height, ,depth)
+
+    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 20.0); //set the perspective (angle of sight, width, height, ,depth)
+    gluLookAt(3,0,5,
+	      0,1,1,
+	      0,1,0);
 //    glLoadIdentity();
-    glTranslatef(0,-1.5,0);
+    //glTranslatef(0,-1.5,0);
 
     glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 
@@ -584,9 +594,10 @@ void renderScene(void) {
 	}
 	glEnd();
 
+	glDisable(GL_POLYGON_OFFSET_FILL);
 	glDisable(GL_DEPTH_TEST);
 
-	glutSwapBuffers();
+	//glutSwapBuffers();
 
 	map<int,std::vector<int> > color_map;
 
@@ -629,6 +640,9 @@ void renderScene(void) {
 	FaceIterator fit = TEST->beginFaces();
 	float thresh = 0.95;
 
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
+
 	for(mip = color_map.begin();mip != color_map.end();mip++){
 		cout << "test new triangle" <<endl;
 
@@ -640,10 +654,10 @@ void renderScene(void) {
 		int c = fit.getPositionIndex(2);
 
 		FaceIterator nit;
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glBegin(GL_LINES);
 		glColor3f(1.0,0,0);
-		for(nit = TEST->beginFaces();nit != TEST->endFaces();++nit){
+		for(nit = TEST->beginFaces();nit != TEST->endFaces();++nit)
+		{
 			if(fit.getIndex() == nit.getIndex())
 				continue;
 			int a2 = nit.getPositionIndex(0);
@@ -656,6 +670,7 @@ void renderScene(void) {
 					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
+						cout << "z:coordinate " << fit.getPosition(0)[3]<<endl;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 					}
 					h++;
@@ -681,11 +696,12 @@ void renderScene(void) {
 					h++;
 				}
 		}
+		glEnd();
 	}
-	glEnd();
 	glutSwapBuffers();
 
 	cout << "number of same edges " << h <<endl;
+
 }
 
 
@@ -699,7 +715,7 @@ int setupGLUT(int *argc, char *argv[])
     // register the GLUT callback functions
     //glutDisplayFunc(display);
     glutDisplayFunc(renderScene);
-    //glutIdleFunc(renderScene);
+    glutIdleFunc(renderScene);
     glutReshapeFunc(reshape);
     glutReshapeWindow(1024,768);
 
