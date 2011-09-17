@@ -163,9 +163,10 @@ int main(int argc, char *argv[])
 	cout << distCoeffs.ptr<double>(0)[0] << " " << distCoeffs.ptr<double>(0)[1] << " " << distCoeffs.ptr<double>(0)[2] << " "
 		<< distCoeffs.ptr<double>(0)[3] << " " << distCoeffs.ptr<double>(0)[4] << " " << distCoeffs.ptr<double>(0)[5] << " "  <<endl;
 */
-    // ar test
+    // AR _BEGIN_
+/*
 
-    /*
+
     const char    *cparam_name    = "pics/camera_para.dat";
     ARParam cparam;
     ARParam wparam;
@@ -269,9 +270,20 @@ int main(int argc, char *argv[])
 	    double patt_width = 225.0;
 	    double patt_center[2] = {0.0,0.0};
 	    double patt_trans[3][4];
+
+	    double quat[4];
+	    double pos[3];
+
 	    if(marker_num > 0 && k == 0){
 		//cout << "Marker found : " << marker_num << "  " << v++ << " - k: " << k <<endl;
 		arGetTransMat(&marker_info[k],patt_center,patt_width,patt_trans);
+		if(arUtilMat2QuatPos(patt_trans,quat,pos) == 0){
+			cout << "quat worked" <<endl;
+			cout << "quat: " << quat[0] << " " << quat[1] << " " << quat[2] << " " << quat[3] << endl;
+			cout << "pos: " << pos[0] << " " << pos[1] << " " << pos[2] << endl;
+			cout <<endl;
+		}
+
 		file << patt_trans[0][0] << " " << patt_trans[0][1] << " " << patt_trans[0][2] << " " << patt_trans[0][3] << " "<<endl;
 		file << patt_trans[1][0] << " " << patt_trans[1][1] << " " << patt_trans[1][2] << " " << patt_trans[1][3] << " "<<endl;
 		file << patt_trans[2][0] << " " << patt_trans[2][1] << " " << patt_trans[2][2] << " " << patt_trans[2][3] << " "<<endl;
@@ -311,7 +323,9 @@ int main(int argc, char *argv[])
 	cv::waitKey(1);
     }
     file.close();
-    */
+
+*/
+    // AR _ENDE_ !!
     //}
 
 
@@ -353,13 +367,6 @@ int main(int argc, char *argv[])
 //		GeometryPtr geo = GeometryPtr::dcast(child->getCore());
 		GeometryPtr geo = GeometryPtr::dcast(scene->getCore());
 
-		TransformPtr geo_transform = Transform::create();
-		Matrix m;
-		m.setIdentity();
-		m.setTranslate(0,0,-100);
-		geo_transform->setMatrix(m);
-
-
 		FaceIterator it;
 
 //		GeometryPtr geom = Geometry::create();
@@ -368,71 +375,9 @@ int main(int argc, char *argv[])
 		GeoPTypesPtr type = GeoPTypesUI8::create();
 		type->addValue(GL_LINE);
 
-/*		for(it = geo->beginFaces(); it != geo->endFaces(); ++it)
-		{
-			std::cout << "Triangle " << it.getIndex() << ":" << std::endl;
-			std::cout << it.getPosition(0) << " " << it.getNormal(0) << std::endl;
-			std::cout << it.getPosition(1) << " " << it.getNormal(1) << std::endl;
-			std::cout << it.getPosition(2) << " " << it.getNormal(2) << std::endl;
-			cout << "_ " << it.getPositionIndex(0) << " # " << it.getPositionIndex(1) << " # " << it.getPositionIndex(2) <<endl;
-
-			FaceIterator sit;
-			int hits(0);
-			int test(0);
-*//*
-			pos->addValue(it.getPosition(0));
-			pos->addValue(it.getPosition(1));
-			pos->addValue(it.getPosition(2));
-
-			norms->addValue(it.getNormal(0));
-			norms->addValue(it.getNormal(1));
-			norms->addValue(it.getNormal(2));*/
-/*			for(sit = geo->beginFaces(); sit != geo->endFaces();++sit)
-			{
-				if(it.getPositionIndex(0) == sit.getPositionIndex(0) ||
-					it.getPositionIndex(0) == sit.getPositionIndex(1) ||
-					it.getPositionIndex(0) == sit.getPositionIndex(2))
-					//cout << "same points in triangle no. "<<sit.getIndex()<<endl;
-											hits++;
-				if(it.getPositionIndex(1) == sit.getPositionIndex(0) ||
-					it.getPositionIndex(1) == sit.getPositionIndex(1) ||
-					it.getPositionIndex(1) == sit.getPositionIndex(2))
-						hits++;
-				//cout << "2 points: "<< hits<<endl;*/
-				/*if(it.getPositionIndex(2) == sit.getPositionIndex(0) ||
-					it.getPositionIndex(2) == sit.getPositionIndex(1) ||
-					it.getPositionIndex(2) == sit.getPositionIndex(2))
-						hits++;
-*/
-				//cout << "normal it: " <<it.getNormal() <<endl;
-/*				if(hits == 2 && sit.getIndex() != it.getIndex())
-				{
-				cout << "angle "<< it.getNormal(0).enclosedAngle(sit.getNormal(0)) <<endl;
-				if(it.getNormal(0).enclosedAngle(sit.getNormal(0)) < 0)
-					continue;
-
-				test++;
-					cout << "same line...! >> ["<<hits<<"]" << sit.getIndex() <<endl;
-					//cout << "normal sit: "<< sit.getNormal(<<endl;
-					if(test > 3){
-
-						cout << "FUCK!!"<<endl;FUCK++;
-
-						}
-
-
-				}
-				hits = 0;
-
-			}
-			cout << ":: "<<FUCK<<endl;
-
-		}*/
-		//geo->setTypes(type);
-
 		LineIterator lit;
 		int lines(0);
-TEST = geo;
+		TEST = geo;
 		for(lit = geo->beginLines();lit != geo->endLines();++lit){
 			lines++;
 			//cout << "pos1: " << lit.getPosition(0)<<endl;
@@ -440,22 +385,10 @@ TEST = geo;
 			//cout << "wtf ?! "<<(lit.getPosition(0)).dist(lit.getPosition(1))<<endl;
 			if((lit.getPosition(0)).dist(lit.getPosition(1)) > 1){
 
-			/*	pos->addValue(lit.getPosition(0));
-				pos->addValue(lit.getPosition(1));
-				//pos->addValue(it.getPosition(2));
 
-				norms->addValue(lit.getNormal(0));
-				norms->addValue(lit.getNormal(1));
-				//norms->addValue(it.getNormal(2));
-*/
-				//Geometry l = Geometry::create();
-				//l.g
 				cout << "GROßES BADABOOOM! >> "<<(lit.getPosition(0)).dist(lit.getPosition(1))<< endl;
 			}
 		}
-
-		//geo->setNormals(norms);
-		//geo->setPositions(pos);
 
 		cout << "lines: " << lines <<endl;
 		SimpleMaterialPtr mat = SimpleMaterial::create();
@@ -465,24 +398,13 @@ TEST = geo;
 	//NodePtr	root = calcVertexNormalsGeo(geom, 1.0);
 		//Matrix m;
 		//m.setIdentity();
-	//(scene->getCore())->accumulateMatrix(m);
-/*
-		Vec3f trans,scale;
-		Quaternion rot,scaleOri;
-		m.setTranslate(225,227,10422);
-		m.getTransform(trans,rot,scale,scaleOri);
-		cout << "values" << trans <<endl;
-*/
 
 	// Create and setup our little friend - the SSM
 	mgr = new SimpleSceneManager;
 	//mgr->setWindow(gwin);
 	//mgr->setRoot(scene);
-
 	//mgr->showAll();
-
 	//glutCreateWindow("test");
-	reshape(1024,768);
 
     glutMainLoop();
 
@@ -499,24 +421,32 @@ TEST = geo;
 void reshape (int w, int h)
 {
 	cout << "reshape ... ["<<w<<","<<h<<"]"<< endl;
-	//glutPostRedisplay();
-    glViewport (0, 0, (GLsizei)w, (GLsizei)h); //set the viewport to the current window specifications
-    glMatrixMode (GL_PROJECTION); //set the matrix to projection
+	glViewport (0, 0, (GLsizei)w, (GLsizei)h); //set the viewport to the current window specifications
 
-glLoadIdentity();
+	glMatrixMode (GL_PROJECTION); //set the matrix to projectio
+	glLoadIdentity();
 
-    gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 20.0); //set the perspective (angle of sight, width, height, ,depth)
-    gluLookAt(3,0,5,
-	      0,1,1,
-	      0,1,0);
-//    glLoadIdentity();
-    //glTranslatef(0,-1.5,0);
-
-    glMatrixMode (GL_MODELVIEW); //set the matrix back to model
+	gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 20.0); //set the perspective (angle of sight, width, height, ,depth)
+	/*gluLookAt(	3,0,5,
+			0,1,1,
+			0,1,0
+		);*/
+	//glScalef(100,100,100);
+	//glTranslatef(0.225,0.227,-10.42);
 
 
-	//glViewport(0, 0, w, h);
-	//renderScene();
+	float m[16] = {0.9132,0.3692,-0.1720,0,
+		      -0.3475,0.9265,0.1437,0,
+		      0.2123,-0.0714,0.9745,0,
+		      0.225,0.277,-10.42,1};
+
+
+
+
+	glMatrixMode (GL_MODELVIEW); //set the matrix back to model
+	glLoadIdentity();
+	glMultMatrixf(m);
+	//glMultMatrixf(m);
 }
 
 // just redraw our scene if this GLUT callback is invoked
@@ -639,13 +569,12 @@ void renderScene(void) {
 	int h(0);
 	FaceIterator fit = TEST->beginFaces();
 	float thresh = 0.95;
+	int count_lines_drawn(0);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
 
 	for(mip = color_map.begin();mip != color_map.end();mip++){
-		cout << "test new triangle" <<endl;
-
 		int face_index = _COLORS[mip->first];
 		fit.seek(face_index);
 
@@ -669,8 +598,9 @@ void renderScene(void) {
 				if(b == a2 || b == b2 || b == c2){
 					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
-						cout << "z:coordinate " << fit.getPosition(0)[3]<<endl;
+						//cout << "z:coordinate " << fit.getPosition(0)[3]<<endl;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 					}
 					h++;
@@ -680,6 +610,7 @@ void renderScene(void) {
 				if(c == a2 || c == b2 || c == c2){
 					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
 					}
@@ -690,6 +621,7 @@ void renderScene(void) {
 				if(b == a2 || b == b2 || b == c2){
 					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						count_lines_drawn++;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
 					}
@@ -701,6 +633,7 @@ void renderScene(void) {
 	glutSwapBuffers();
 
 	cout << "number of same edges " << h <<endl;
+	cout << "lines drawn: " << count_lines_drawn << endl;
 
 }
 
@@ -715,9 +648,9 @@ int setupGLUT(int *argc, char *argv[])
     // register the GLUT callback functions
     //glutDisplayFunc(display);
     glutDisplayFunc(renderScene);
-    glutIdleFunc(renderScene);
+    //glutIdleFunc(renderScene);
     glutReshapeFunc(reshape);
-    glutReshapeWindow(1024,768);
+    glutReshapeWindow(1920,1080);
 
     return winid;
 }
