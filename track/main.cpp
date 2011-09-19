@@ -63,12 +63,14 @@ void camera(void);
 void reshape(int w, int h);
 void renderScene();
 vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2);
+void sortLines();
 
 GeometryPtr TEST;
 //angle of rotation
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 
 vector<Pnt3f> _CONTROLPOINTS;
+vector<Pnt3f> _LINES;
 
 int main(int argc, char *argv[])
 {
@@ -480,14 +482,19 @@ void renderScene(void) {
 
 	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
 	{
-		// create random color
-		int r = (int)rand() % 255;
-		int g = (int)rand() % 255;
-		int b = (int)rand() % 255;
+		int rgb_index = 0;
+		int r,g,b;
+		while(_COLORS[rgb_index] != NULL)
+		{
+			// create random color
+			r = (int)rand() % 255;
+			g = (int)rand() % 255;
+			b = (int)rand() % 255;
 
-		// calculate index
-		int rgb_index = 256 * g + 256 * 256 * r + b;
-		//cout << rgb_index << endl;
+			// calculate index
+			rgb_index = 256 * g + 256 * 256 * r + b;
+			//cout << rgb_index << endl;
+		}
 
 		// SAVE ALL _USED_ COLORS
 		vector<Pnt3f> v;
@@ -609,7 +616,9 @@ void renderScene(void) {
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
-						createControlPoints(fit.getPosition(0),fit.getPosition(1));
+						_LINES.push_back(fit.getPosition(0));
+						_LINES.push_back(fit.getPosition(1));
+						//createControlPoints(fit.getPosition(0),fit.getPosition(1));
 					}
 					h++;
 				}
@@ -620,7 +629,9 @@ void renderScene(void) {
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
-						createControlPoints(fit.getPosition(0),fit.getPosition(2));
+						_LINES.push_back(fit.getPosition(0));
+						_LINES.push_back(fit.getPosition(2));
+						//createControlPoints(fit.getPosition(0),fit.getPosition(2));
 					}
 					h++;
 				}
@@ -631,7 +642,9 @@ void renderScene(void) {
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
-						createControlPoints(fit.getPosition(1),fit.getPosition(2));
+						_LINES.push_back(fit.getPosition(1));
+						_LINES.push_back(fit.getPosition(2));
+						//createControlPoints(fit.getPosition(1),fit.getPosition(2));
 					}
 					h++;
 				}
@@ -641,6 +654,17 @@ void renderScene(void) {
 	}
 
 	//glutSwapBuffers();
+
+	// DRAW _CONTROLPOINTS_
+
+	//sorted lines by length in _LINES
+	sortLines();
+	// create CP's now
+	_CONTROLPOINTS.clear();
+	for(int i(0);i < _LINES.size()/10;i=i+2){
+		createControlPoints(_LINES[i],_LINES[i+1]);
+	}
+
 	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBegin(GL_POINTS);
 	glColor3f(0,1,0);
@@ -653,7 +677,6 @@ void renderScene(void) {
 
 	cout << "number of same edges " << h <<endl;
 	cout << "lines drawn: " << count_lines_drawn << endl;
-
 }
 
 vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2){
@@ -677,6 +700,36 @@ vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2){
 		_CONTROLPOINTS.push_back(np);
 	}
 	return result;
+}
+
+void sortLines(){
+	map<int, float> lengths;
+	map<int,float>::iterator mip;
+	vector<Pnt3f> result;
+
+	for(int i(0);i<_LINES.size();i=i+2)
+	{
+		Vec3f vec = _LINES[i+1] - _LINES[i];
+		float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+		lengths[i] = length;
+	}
+
+	vector<int> index_vec;
+	while(lengths.size() != index_vec.size()){
+		float max = -1;
+		int max_index;
+		for(mip = lengths.begin();mip != lengths.end();mip++ ){
+			if(mip->second > max){
+				max_index = mip->first;
+				max = mip->second;
+			}
+		}
+		result.push_back(_LINES[max_index]);
+		result.push_back(_LINES[max_index+1]);
+		index_vec.push_back(max_index);
+		lengths[max_index] = -1;
+	}
+	_LINES = result;
 }
 
 
