@@ -62,10 +62,13 @@ char* itoa( int value, char* result, int base );
 void camera(void);
 void reshape(int w, int h);
 void renderScene();
+vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2);
 
 GeometryPtr TEST;
 //angle of rotation
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
+
+vector<Pnt3f> _CONTROLPOINTS;
 
 int main(int argc, char *argv[])
 {
@@ -294,6 +297,11 @@ int main(int argc, char *argv[])
 
 		file << marker_info[k].pos[0] << " " << marker_info[k].pos[1] <<endl;
 
+		cout << "p1: " << marker_info[k].vertex[0][0] << " " << marker_info[k].vertex[0][1]<< endl;
+		cout << "p2: " << marker_info[k].vertex[1][0] << " " << marker_info[k].vertex[1][1]<< endl;
+		cout << "p3: " << marker_info[k].vertex[2][0] << " " << marker_info[k].vertex[2][1]<< endl;
+		cout << "p4: " << marker_info[k].vertex[3][0] << " " << marker_info[k].vertex[3][1]<< endl;
+
 		cv::line(newAR,cv::Point(marker_info[k].vertex[0][0],marker_info[k].vertex[0][1]),cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),CV_RGB(255,0,0));
 		cv::line(newAR,cv::Point(marker_info[k].vertex[1][0],marker_info[k].vertex[1][1]),cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),CV_RGB(255,0,0));
 		cv::line(newAR,cv::Point(marker_info[k].vertex[2][0],marker_info[k].vertex[2][1]),cv::Point(marker_info[k].vertex[3][0],marker_info[k].vertex[3][1]),CV_RGB(255,0,0));
@@ -426,27 +434,25 @@ void reshape (int w, int h)
 	glMatrixMode (GL_PROJECTION); //set the matrix to projectio
 	glLoadIdentity();
 
-	gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 20.0); //set the perspective (angle of sight, width, height, ,depth)
-	/*gluLookAt(	3,0,5,
-			0,1,1,
-			0,1,0
-		);*/
-	//glScalef(100,100,100);
-	//glTranslatef(0.225,0.227,-10.42);
-
+	gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
 
 	float m[16] = {0.9132,0.3692,-0.1720,0,
 		      -0.3475,0.9265,0.1437,0,
 		      0.2123,-0.0714,0.9745,0,
-		      0.225,0.277,-10.42,1};
+		      0.225,-0.277,-10,1};
 
+	float m_ori[16] = {	0.9132,-0.3692,-0.1720,0,
+				-0.3475,-0.9265,0.1437,0,
+				-0.2123,-0.0714,-0.9745,0,
+				0.225,0.277,-10,1};
 
-
-
+	glMultMatrixf(m);
+	//glTranslatef(1,-4.5,0);
 	glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 	glLoadIdentity();
-	glMultMatrixf(m);
-	//glMultMatrixf(m);
+
+	glScalef(1.4,1.4,1.4);
+
 }
 
 // just redraw our scene if this GLUT callback is invoked
@@ -456,8 +462,10 @@ void display(void)
 }
 
 void renderScene(void) {
+	int window_w = 960;
+	int window_h = 540;
+
 	cout << "render scene... "<<endl;
-	//reshape(1024,768);
 
 	TriangleIterator ti;
 	glEnable(GL_DEPTH_TEST);
@@ -532,10 +540,10 @@ void renderScene(void) {
 	map<int,std::vector<int> > color_map;
 
 	// window size
-	int size = 1024*756*3;
+	int size = window_w*window_h*3;
 	// read pixels
 	GLubyte *pixels = new GLubyte[size];
-	glReadPixels(0 , 0 , 1024 , 756 , GL_RGB , GL_UNSIGNED_BYTE , pixels);
+	glReadPixels(0 , 0 , window_w , window_h , GL_RGB , GL_UNSIGNED_BYTE , pixels);
 
 	// init RGB and count&debug values
 	int red,green,blue;
@@ -574,6 +582,7 @@ void renderScene(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINES);
 
+	vector<Pnt3f> cp;
 	for(mip = color_map.begin();mip != color_map.end();mip++){
 		int face_index = _COLORS[mip->first];
 		fit.seek(face_index);
@@ -596,45 +605,78 @@ void renderScene(void) {
 			// a-b
 			if(a == a2 || a == b2 || a == c2)
 				if(b == a2 || b == b2 || b == c2){
-					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
-						//cout << "z:coordinate " << fit.getPosition(0)[3]<<endl;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
+						createControlPoints(fit.getPosition(0),fit.getPosition(1));
 					}
 					h++;
 				}
 			// a-c
 			if(a == a2 || a == b2 || a == c2)
 				if(c == a2 || c == b2 || c == c2){
-					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
+						createControlPoints(fit.getPosition(0),fit.getPosition(2));
 					}
 					h++;
 				}
 			// c-b
 			if(c == a2 || c == b2 || c == c2)
 				if(b == a2 || b == b2 || b == c2){
-					//cout << fit.getIndex() << " <-> "<<nit.getIndex()<<endl;
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
+						createControlPoints(fit.getPosition(1),fit.getPosition(2));
 					}
 					h++;
 				}
 		}
+
 		glEnd();
 	}
+
+	//glutSwapBuffers();
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBegin(GL_POINTS);
+	glColor3f(0,1,0);
+	cout << "no of CP: "<< _CONTROLPOINTS.size() <<endl;
+	for(int i(0);i < _CONTROLPOINTS.size(); ++i){
+		glVertex3f(_CONTROLPOINTS[i][0],_CONTROLPOINTS[i][1],_CONTROLPOINTS[i][2]);
+	}
+	glEnd();
 	glutSwapBuffers();
 
 	cout << "number of same edges " << h <<endl;
 	cout << "lines drawn: " << count_lines_drawn << endl;
 
+}
+
+vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2){
+	vector<Pnt3f> result;
+	Vec3f vec = p2 - p1;
+	// calculate length
+	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+	if (length < 0.2)
+		return result;
+
+	//every 5% of the line
+	float stepsize = 0.025;
+	for(int i(0);i*stepsize <= 1;i++)
+	{
+		//cout << " cp at ->"<< p1+i*step*vec;
+		Pnt3f np;
+		np[0] = p1[0] + (stepsize*i) * vec[0];
+		np[1] = p1[1] + (stepsize*i) * vec[1];
+		np[2] = p1[2] + (stepsize*i) * vec[2];
+		//cout << np[0] << " " << np[1] << " " << np[2] <<endl;
+		_CONTROLPOINTS.push_back(np);
+	}
+	return result;
 }
 
 
@@ -650,7 +692,7 @@ int setupGLUT(int *argc, char *argv[])
     glutDisplayFunc(renderScene);
     //glutIdleFunc(renderScene);
     glutReshapeFunc(reshape);
-    glutReshapeWindow(1920,1080);
+    glutReshapeWindow(960,540);
 
     return winid;
 }
