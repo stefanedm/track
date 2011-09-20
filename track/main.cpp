@@ -1,6 +1,7 @@
 #include <QtCore/QCoreApplication>
 
 #include <map>
+#include <time.h>
 
 // OPENSG INCLUDES
 #include <OpenSG/OSGConfig.h>
@@ -63,14 +64,19 @@ void camera(void);
 void reshape(int w, int h);
 void renderScene();
 vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2);
+float createControlPoints2D(int i, Pnt2d p1, Pnt2d p2) ;
 void sortLines();
+Pnt2f checkNormal(Pnt2d controlPoint, Pnt2f normal, cv::Mat picture);
 
 GeometryPtr TEST;
 //angle of rotation
 float xpos = 0, ypos = 0, zpos = 0, xrot = 0, yrot = 0, angle=0.0;
 
 vector<Pnt3f> _CONTROLPOINTS;
+map<int, vector<Pnt2d> > _CP2D;
+vector<Pnt2d> _NORMALS;
 vector<Pnt3f> _LINES;
+vector<Pnt2d> _LINES2D;
 
 int main(int argc, char *argv[])
 {
@@ -169,8 +175,8 @@ int main(int argc, char *argv[])
 		<< distCoeffs.ptr<double>(0)[3] << " " << distCoeffs.ptr<double>(0)[4] << " " << distCoeffs.ptr<double>(0)[5] << " "  <<endl;
 */
     // AR _BEGIN_
-/*
 
+/*
 
     const char    *cparam_name    = "pics/camera_para.dat";
     ARParam cparam;
@@ -212,18 +218,18 @@ int main(int argc, char *argv[])
     //wparam.dist_factor[3] = -0.0001997;
     //cout <<"RESET..."<<endl;
 
-    arParamChangeSize( &wparam, 1920, 1080, &cparam );
+    arParamChangeSize( &wparam, 1280, 1024, &cparam );
     arInitCparam( &cparam );
     cout << "*** Camera Parameter ***"<<endl;
     arParamDisp( &cparam );
 
     //open file
     fstream file;
-    file.open("1920x1080Data.dat",ios::out);
+    file.open("1280x1024Data.dat",ios::out);
 
     cv::Mat RGB;
     int v = 0;
-    for(int u=1;u<=520;++u){
+    for(int u=1;u<=652;++u){
 	file<<"#FRAME_"<<u<<endl;
 	//cout << "in loop..."<<endl;
 	stringstream stream;
@@ -232,7 +238,7 @@ int main(int argc, char *argv[])
 	stream << ".bmp";
 
 	RGB = cv::imread(stream.str().c_str());
-	//cv::flip(RGB,RGB,0);
+	cv::flip(RGB,RGB,0);
 
 	cv::Mat matAR(RGB.rows,RGB.cols,CV_8UC4);
 	cv::cvtColor(RGB,matAR,CV_BGR2BGRA);
@@ -348,7 +354,7 @@ int main(int argc, char *argv[])
 	//gwin->init();
 
 
-	OSG::NodePtr scene = SceneFileHandler::the().read("data/test3_3.obj");
+	OSG::NodePtr scene = SceneFileHandler::the().read("data/test3_4.obj");
 	//GroupPtr scene = GroupPtr::dcast(scene);
 
 
@@ -436,24 +442,55 @@ void reshape (int w, int h)
 	glMatrixMode (GL_PROJECTION); //set the matrix to projectio
 	glLoadIdentity();
 
-	gluPerspective (60, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
+	gluPerspective (40, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
 
-	float m[16] = {0.9132,0.3692,-0.1720,0,
+	float m2[16] = {0.9132,0.3692,-0.1720,0,
 		      -0.3475,0.9265,0.1437,0,
 		      0.2123,-0.0714,0.9745,0,
-		      0.225,-0.277,-10,1};
+		      -0.225,-0.277,-10,1};
 
 	float m_ori[16] = {	0.9132,-0.3692,-0.1720,0,
 				-0.3475,-0.9265,0.1437,0,
 				-0.2123,-0.0714,-0.9745,0,
 				0.225,0.277,-10,1};
 
-	glMultMatrixf(m);
+	float m3[16] = {0.928802, -0.343542, -0.138944,0,
+		       0.319822, 0.932512, -0.167737,0,
+			0.187192, 0.111357, 0.975991,0,
+		       0.101902, -0.318688, -10.6817, 1
+		      };
+
+
+	float m_1[16] = {0.730773, 0.527366, 0.433424,0,
+		       -0.440607, 0.849369, 0.29058,0,
+		       -0.521379, 0.0213784, 0.853058,0,
+			0.130085,-1.84052,-9.32334,1
+		      };
+
+	float m[16] = {	0.801372 ,-0.114318 , 0.587141 ,0,
+			0.297329,0.927846 ,-0.225162 ,0,
+			-0.519036,0.355013,0.77754,0,
+			0.7514,-1.802,-9.329,1
+
+	};
+
+
+
+	/*
+ float m[16] = {	0.884392,-0.302862,0.355192,0,
+		 -0.383418,-0.90528,0.182919,0,
+		 0.26616,-0.29796,-0.916722,0,
+		 0.225,0.277,-10,1};
+	  */
+
+
 	//glTranslatef(1,-4.5,0);
 	glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 	glLoadIdentity();
+	glMultMatrixf(m);
 
-	glScalef(1.4,1.4,1.4);
+	float scalev = 1;
+	glScalef(scalev,scalev,scalev);
 
 }
 
@@ -464,8 +501,8 @@ void display(void)
 }
 
 void renderScene(void) {
-	int window_w = 960;
-	int window_h = 540;
+	int window_w = 640;
+	int window_h = 512;
 
 	cout << "render scene... "<<endl;
 
@@ -658,25 +695,256 @@ void renderScene(void) {
 	// DRAW _CONTROLPOINTS_
 
 	//sorted lines by length in _LINES
-	sortLines();
+	//sortLines();
 	// create CP's now
-	_CONTROLPOINTS.clear();
-	for(int i(0);i < _LINES.size()/10;i=i+2){
+	//_CONTROLPOINTS.clear();
+	_CP2D.clear();
+	_LINES2D.clear();
+	/*for(int i(0);i < _LINES.size()/10;i=i+2){
 		createControlPoints(_LINES[i],_LINES[i+1]);
 	}
 
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBegin(GL_POINTS);
 	glColor3f(0,1,0);
 	cout << "no of CP: "<< _CONTROLPOINTS.size() <<endl;
 	for(int i(0);i < _CONTROLPOINTS.size(); ++i){
 		glVertex3f(_CONTROLPOINTS[i][0],_CONTROLPOINTS[i][1],_CONTROLPOINTS[i][2]);
 	}
-	glEnd();
-	glutSwapBuffers();
+	glEnd();*/
+	//glutSwapBuffers();
 
 	cout << "number of same edges " << h <<endl;
 	cout << "lines drawn: " << count_lines_drawn << endl;
+
+	/*float projectionMatrix[16];
+	glGetFloatv(GL_PROJECTION_MATRIX, projectionMatrix);
+
+	for(int k(0);k<16;++k)
+		cout << " " <<projectionMatrix[k]<<endl;
+*/
+
+	//open cv
+	cv::Mat init_Image2 = cvLoadImage("pics/326_1.bmp");
+	//cv::imshow("showing image",init_Image);
+	cv::flip(init_Image2,init_Image2,0);
+	cv::Mat gray;
+	cv::Mat init_Image;// = init_Image2.clone();
+
+	cv::cvtColor(init_Image2,gray,CV_RGB2GRAY);
+
+
+	cv::Mat gaus;
+	//cv::GaussianBlur(gray,gaus,cv::Size(3,3),1);
+	//cv::Sobel(gaus,init_Image,init_Image.type(),1,0,3);
+	cv::Canny(gray,init_Image,0,3,3,true);
+	//cv::cvtColor(init_Image,init_Image2,CV_GRAY2RGB);
+	//init_Image = init_Image2.clone();
+
+	cv::imshow("gray",init_Image);
+
+	// window size
+	size = window_w*window_h*3;
+	// read pixels
+	GLubyte *pixels2 = new GLubyte[size];
+	glReadPixels(0 , 0 , window_w , window_h , GL_RGB , GL_UNSIGNED_BYTE , pixels2);
+
+	cv::Mat ogl = cv::Mat(window_h,window_w,CV_8UC3);
+	ogl.data = pixels2;
+
+	cv::flip(ogl,ogl,0);
+
+	CvSize size2;
+	size2.height=512;
+	size2.width=640;
+	cv::Mat result = cv::Mat(size2,CV_8UC3);//= (cv::Mat)cvCreateImage(size2,8,3);
+
+	//cvZero(result);
+
+	//cv::add(init_Image,ogl,result);
+
+	float projection[9] = {	0.801372 ,-0.114318 , 0.587141 ,
+			0.297329,0.927846 ,-0.225162 ,
+			-0.519036,0.355013,0.77754
+
+	};
+	//MY 2D-POINTS
+	GLdouble modelview[16], projection2[16];
+	GLint viewport[4];
+
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection2);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
+	double tx, ty, tz;
+	for(int i(0); i < _LINES.size(); ++i)
+	{
+		Pnt3f tmp = _LINES[i];
+		gluProject(tmp[0], tmp[1], tmp[2],
+			modelview, projection2, viewport,
+			&tx, &ty, &tz);
+
+		//cout <<"x: " <<tx << "y: "<<ty<<endl;
+		Pnt2d res;
+		res[0] = tx;
+		res[1] = ty;
+		_LINES2D.push_back(res);
+	}
+
+	sortLines();
+	// draw 2D-Lines
+	//define threshold for CP creation
+	int thres = (int)(_LINES2D.size()/2)*0.15;
+	cout << ">>>>>> "<<thres<<endl;
+	cv::flip(init_Image,init_Image,0);
+	for(int i(0);i<_LINES2D.size();i=i+2){
+		Pnt2d p1 = _LINES2D[i];
+		Pnt2d p2 = _LINES2D[i+1];
+		cv::line(result,cv::Point(p1[0],p1[1]),cv::Point(p2[0],p2[1]),CV_RGB(255,0,0));
+		//creating 2d controlpoints
+		float t = createControlPoints2D(i,p1,p2);
+		if(i <= thres){
+			vector<Pnt2d> cp = _CP2D[i];
+			for(int j(0);j<cp.size();++j){
+				Pnt2d tmp = cp[j];
+				Pnt2f n1 = _NORMALS[i];
+				Pnt2f n2 = _NORMALS[i+1];
+				//cv::line(result,cv::Point(tmp[0],tmp[1]),cv::Point(tmp[0]+n1[0],tmp[1]+n1[1]),CV_RGB(0,255,0));
+				//cv::line(result,cv::Point(tmp[0],tmp[1]),cv::Point(tmp[0]+n2[0],tmp[1]+n2[1]),CV_RGB(0,255,0));
+				//cv::imshow("fucking fuck", init_Image);
+				/*for(int k(0);k < 250 ; ++k){
+					Pnt2f tmp2;
+					tmp2[0]= tmp[0] + n1[0] * 0.1 * k;
+					tmp2[1]=tmp[1]+ n1[1] * 0.1 * k;
+
+					cv::Point p = cv::Point(tmp2[0],tmp2[1]);
+					uchar blue = init_Image.at<uchar>(p);
+
+					/*for(int row(0);row < init_Image.rows;++row){
+						for(int cols(0);cols < init_Image.cols;++cols){
+							cv::Point p = cv::Point(cols,row);
+							//cout <<p <<endl;
+							uchar blue = init_Image.at<uchar>(p);
+							//cout << (int)blue<<endl;
+							if((int)blue == 0)
+								cv::line(result,p,p,CV_RGB(0,0,255));
+							else
+								cv::line(result,p,p,CV_RGB(255,0,0));
+
+						}
+					}break; //
+
+					cv::line(result,cv::Point(tmp2[0],tmp2[1]),cv::Point(tmp2[0],tmp2[1]),CV_RGB(0,0,255));
+					if(blue != 0)
+					{
+						break;
+						cv::line(result,cv::Point(tmp2[0],tmp2[1]),cv::Point(tmp2[0],tmp2[1]),CV_RGB(0,0,255));
+						//break;
+					}
+
+			}*/
+				cout << "new CP---------"<<endl;
+				//break;
+
+				Pnt2f hit = checkNormal(tmp,n1,init_Image);
+				cout << hit<<endl;
+				Pnt2f hit1 = checkNormal(tmp,n2,init_Image);
+				cout << hit1 <<endl;
+				//cout << hit<<endl;
+				if(hit[0] != -1 && hit1[0] != -1)
+					if(tmp.dist(hit)<tmp.dist(hit1))
+						//if(tmp.dist(hit)<2)
+						cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,0));
+					else
+						//if(tmp.dist(hit1)<2)
+						cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(255,255,0));
+
+				//break;
+			}
+
+		}//break;
+
+	}
+
+	//convert gray canny image back to rgb
+	cv::cvtColor(init_Image,init_Image2,CV_GRAY2RGB);
+	// generated error image
+	cv::add(init_Image2,result,result);
+	// flip like hell
+	cv::flip(result,result,0);
+
+	// save image
+	cv::imshow("showing image",result);
+	stringstream ss;
+	ss << time(0) << ".bmp";
+	cv::imwrite(ss.str(),result);
+
+}
+
+Pnt2f checkNormal(Pnt2d controlPoint, Pnt2f normal, cv::Mat picture){
+	Pnt2f result;
+	result[0] = -1;
+	//cout << "cp: "<< controlPoint<<endl;
+	int x(controlPoint[0]),y(controlPoint[1]);
+	float min(MAXFLOAT);
+	int i(0);
+
+	while((x > 0 && y >0) && (x<640 && y < 512)){
+		i++;
+		Pnt2f tmp;
+		tmp[0]= controlPoint[0] + /*normal[0]*/ 0.01 * i;
+		tmp[1]=controlPoint[1];
+		if(x == (int)tmp[0] && y == (int)tmp[1])
+			continue;
+		x = (int) tmp[0];
+		y = (int) tmp[1];
+		//check pixels
+		//cout <<" x: "<< x << "y: "<< y <<endl;
+
+		cv::Point p = cv::Point(tmp[0],tmp[1]);
+		uchar blue = picture.at<uchar>(p);
+
+
+		//cout << vec <<endl;
+		//continue;
+		if(blue == 0)
+			continue;
+		cout << i<<" hit something"<<endl;
+		//cout << vec <<endl;
+		return tmp;
+	}
+	cout << "hit: "<<result<<endl;
+	return result;
+}
+
+float createControlPoints2D(int i, Pnt2d p1, Pnt2d p2)
+{
+	Vec2f vec = p2 - p1;
+	// calculate length
+	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
+	if (length < 1)
+		return -1;
+
+	//every 2.5% of the line
+	float stepsize = 0.05;
+	vector<Pnt2d> cp;
+	for(int i(0);i*stepsize <= 1;i++)
+	{
+		//cout << " cp at ->"<< p1+i*step*vec;
+		Pnt2f np;
+		np[0] = p1[0] + (stepsize*i) * vec[0];
+		np[1] = p1[1] + (stepsize*i) * vec[1];
+		//cout << np[0] << " " << np[1] <<endl;
+		cp.push_back(np);
+	}
+	// calcnormal
+	Pnt2f n1; n1[0] = -vec[1]/length*4;n1[1] = vec[0]/length*4;
+	Pnt2f n2; n2[0] = vec[1]/length*4;n2[1] = -vec[0]/length*4;
+	_NORMALS.push_back(n1);
+	_NORMALS.push_back(n2);
+
+	_CP2D[i] = cp;
+	return length;// result;
 }
 
 vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2){
@@ -705,12 +973,12 @@ vector<Pnt3f> createControlPoints(Pnt3f p1, Pnt3f p2){
 void sortLines(){
 	map<int, float> lengths;
 	map<int,float>::iterator mip;
-	vector<Pnt3f> result;
+	vector<Pnt2d> result;
 
-	for(int i(0);i<_LINES.size();i=i+2)
+	for(int i(0);i<_LINES2D.size();i=i+2)
 	{
-		Vec3f vec = _LINES[i+1] - _LINES[i];
-		float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+		Vec2f vec = _LINES2D[i+1] - _LINES2D[i];
+		float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 		lengths[i] = length;
 	}
 
@@ -724,12 +992,12 @@ void sortLines(){
 				max = mip->second;
 			}
 		}
-		result.push_back(_LINES[max_index]);
-		result.push_back(_LINES[max_index+1]);
+		result.push_back(_LINES2D[max_index]);
+		result.push_back(_LINES2D[max_index+1]);
 		index_vec.push_back(max_index);
 		lengths[max_index] = -1;
 	}
-	_LINES = result;
+	_LINES2D = result;
 }
 
 
@@ -745,7 +1013,7 @@ int setupGLUT(int *argc, char *argv[])
     glutDisplayFunc(renderScene);
     //glutIdleFunc(renderScene);
     glutReshapeFunc(reshape);
-    glutReshapeWindow(960,540);
+    glutReshapeWindow(640,512);
 
     return winid;
 }
