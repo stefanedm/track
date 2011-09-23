@@ -66,12 +66,12 @@ char* itoa( int value, char* result, int base );
 void camera(void);
 void reshape(int w, int h);
 void renderScene();
-vector<Pnt3f> createControlPoints(int lineIndex, Pnt3f p1, Pnt3f p2);
+vector<Pnt3f> createControlPoints(int lineIndex, Pnt3f p1, Pnt3f p2,int thres);
 float createControlPoints2D(int i, Pnt2d p1, Pnt2d p2) ;
 void sortLines();
-void sortLines3D();
+void sortLines3D(int thres);
 Pnt2f checkNormal(Pnt2d controlPoint, Pnt2f normal, cv::Mat picture);
-bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint);
+bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f normal, Pnt2f old_hit);
 void mapping(double *p, double *x, int m, int n, void *data);
 void drawModel(cv::Mat pic, int r, int g, int b);
 
@@ -88,8 +88,8 @@ vector<Pnt3f> _LINES;
 vector<Pnt3d> _LINES2D;
 
 int main(int argc, char *argv[])
-{
-    /*int j = 0;
+{/*
+    int j = 0;
 
     // Allocate Sotrage
     std::vector<std::vector<cv::Point3f> > object_points;
@@ -181,10 +181,27 @@ int main(int argc, char *argv[])
 	cout << "##DISTORTION##" <<endl;
 	cout << distCoeffs.ptr<double>(0)[0] << " " << distCoeffs.ptr<double>(0)[1] << " " << distCoeffs.ptr<double>(0)[2] << " "
 		<< distCoeffs.ptr<double>(0)[3] << " " << distCoeffs.ptr<double>(0)[4] << " " << distCoeffs.ptr<double>(0)[5] << " "  <<endl;
-*/
-    // AR _BEGIN_
 
+
+	for(int i = 1 ; i< 300 ; i++){
+
+	    stringstream stream,s2;
+	    stream << "pics/";
+	    stream << i;
+	    stream << ".bmp";
+	    cout << "#### PICTURE NO. "<<i<<"####" << stream.str().c_str() <<endl;
+	    cv:: Mat image = cvLoadImage(stream.str().c_str());
+	cv::Mat newI;
+		cv::undistort(image,newI,intrinsic,distCoeffs);
+		s2 << "pics/undist/";
+		s2 << i;
+		s2 << ".bmp";
+		cv::imwrite(s2.str().c_str(),newI);
+	}
+	exit(0);*/
+    // AR _BEGIN_
 /*
+
 
     const char    *cparam_name    = "pics/camera_para.dat";
     ARParam cparam;
@@ -237,11 +254,11 @@ int main(int argc, char *argv[])
 
     cv::Mat RGB;
     int v = 0;
-    for(int u=1;u<=652;++u){
+    for(int u=1;u<=200;++u){
 	file<<"#FRAME_"<<u<<endl;
 	//cout << "in loop..."<<endl;
 	stringstream stream;
-	stream << "pics/";
+	stream << "pics/undist/";
 	stream << u;
 	stream << ".bmp";
 
@@ -356,6 +373,10 @@ int main(int argc, char *argv[])
   //  QCoreApplication a(argc, argv);
 
 	OSG::osgInit(argc,argv);
+	cout << "argc " << argc <<endl;
+	for(int ar(0);ar<argc;++ar)
+		cout << argv[ar] << " ";
+	cout << endl;
 	int winid = setupGLUT(&argc,argv);
 	//GLUTWindowPtr gwin = GLUTWindow::create();
 	//gwin->setGlutId(winid);
@@ -450,8 +471,8 @@ void reshape (int w, int h)
 	glMatrixMode (GL_PROJECTION); //set the matrix to projectio
 	glLoadIdentity();
 
-	gluPerspective (40, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
-
+	gluPerspective (52, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
+glLoadIdentity();
 	float m2[16] = {0.9132,0.3692,-0.1720,0,
 		      -0.3475,0.9265,0.1437,0,
 		      0.2123,-0.0714,0.9745,0,
@@ -469,18 +490,57 @@ void reshape (int w, int h)
 		      };
 
 
-	float m_1[16] = {0.730773, 0.527366, 0.433424,0,
+	float m_5[16] = {0.730773, 0.527366, 0.433424,0,
 		       -0.440607, 0.849369, 0.29058,0,
 		       -0.521379, 0.0213784, 0.853058,0,
 			0.130085,-1.84052,-9.32334,1
 		      };
 
-	float m[16] = {	0.801372 ,-0.114318 , 0.587141 ,0,
+	float m_1[16] = {0.801372 ,-0.114318 , 0.587141 ,0,
 			0.297329,0.927846 ,-0.225162 ,0,
 			-0.519036,0.355013,0.77754,0,
-			0.7514,-1.802,-9.329,1
+			1.2514,-1.802,-9.329,1
 
 	};
+
+
+	float m_79dist[16] = {0.83454 ,-0.0234424 , -0.550449 ,0,
+			-0.0484908,0.992092 ,-0.115768 ,0,
+			0.54881,0.123305,0.826803,0,
+			0.317,-1.657,-8.929,1
+
+	};
+
+	float m79[16] = {0.811256 ,-0.0436883 , -0.583057 ,0,
+			-0.0291407,0.992944 ,-0.114947 ,0,
+			0.583965,0.110242,0.804258,0,
+			0.302,-1.62608,-8.60363,1
+
+	};
+
+	float m_OLD[16] = {0.806114 ,0.533122 , 0.256828 ,0,
+			-0.422132,0.822216 ,-0.381792 ,0,
+			-0.41471,0.199353,0.887848,0,
+			0.0,-1.906,-9.455,1
+
+	};
+
+	//generated
+	float m[16] = {	1.32222, 1.1274, -0.198695, -0.256828,
+			-0.688105, 1.61599, 0.28491, 0.381792,
+			-0.709301, 0.226619, -0.898599, -0.887848,
+			-0.255447, -3.91252, 9.42976, 9.455
+
+	};
+
+
+
+	/*
+		0.806114 -0.422132 -0.41471 -143.384
+		-0.533122 -0.822216 -0.199353 1906.58
+		-0.256828 0.381792 -0.887848 9455.03
+	*/
+
 
 glMultMatrixf(m);
 
@@ -494,10 +554,11 @@ glMultMatrixf(m);
 
 	//glTranslatef(1,-4.5,0);
 	glMatrixMode (GL_MODELVIEW); //set the matrix back to model
-	//glLoadIdentity();
+	glLoadIdentity();
+	//glTranslatef(0,0,-4);
 
 //glMultMatrixf(m);
-	float scalev = 1;
+	float scalev = 1.3;
 	glScalef(scalev,scalev,scalev);
 
 }
@@ -509,8 +570,10 @@ void display(void)
 }
 
 void renderScene(void) {
-for(int q(0);q<5;++q)
-{	int window_w = 640;
+for(int q(1);q<200;++q)
+{
+for(int fu(0);fu<1;++fu){
+	int window_w = 640;
 	int window_h = 512;
 
 	cout << "render scene... "<<endl;
@@ -706,12 +769,13 @@ for(int q(0);q<5;++q)
 	//sorted lines by length in _LINES
 	//sortLines();
 	// create CP's now
+	_HITPOINTS.clear();
 	_CONTROLPOINTS.clear();
 	_CP2D.clear();
 	_LINES2D.clear();
-	for(int i(0);i < _LINES.size()/10;i=i+2){
+	/*for(int i(0);i < _LINES.size()/10;i=i+2){
 		createControlPoints(i,_LINES[i],_LINES[i+1]);
-	}
+	}*/
 /*
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glBegin(GL_POINTS);
@@ -728,13 +792,19 @@ for(int q(0);q<5;++q)
 	glEnd();
 	glutSwapBuffers();
 */
-	cout << "3D Control Points :: "<< _CONTROLPOINTS.size() <<endl;
+	cout << "Lines over Threshold :: "<< _CONTROLPOINTS.size() <<endl;
 	cout << "Shared Edges :: " << h <<endl;
 	cout << "Lines drawn :: " << count_lines_drawn << endl;
 	cout << "Lines :: "<< _LINES.size()<<endl;
 
 	//open cv
-	cv::Mat init_Image2 = cvLoadImage("pics/326_1.bmp");
+	stringstream stream;
+	stream << "pics/";
+	stream << q;
+	stream << ".bmp";
+	/*"pics/1_1.bmp"*/
+	cout << "/*** PICTURE "<< stream.str().c_str() << " ***/"<<endl;
+	cv::Mat init_Image2 = cvLoadImage(stream.str().c_str());
 	cv::Mat original = init_Image2.clone();
 	//cv::imshow("showing image",init_Image);
 	cv::flip(init_Image2,init_Image2,0);
@@ -745,9 +815,31 @@ for(int q(0);q<5;++q)
 
 
 	cv::Mat gaus;
-	//cv::GaussianBlur(gray,gaus,cv::Size(3,3),1);
-	//cv::Sobel(gaus,init_Image,init_Image.type(),1,0,3);
-	cv::Canny(gray,init_Image,12,17,3,true);
+	cv::GaussianBlur(gray,gaus,cv::Size(3,3),1);
+	//cv::Sobel(gray,init_Image,init_Image.type(),1,0,3);
+	cv::Canny(gaus,init_Image,12,17,3,true);
+	vector<vector<cv::Point> > contours;
+	vector<vector<cv::Point> > new_contours;
+	cv::findContours(init_Image,contours,CV_RETR_LIST,CV_CHAIN_APPROX_NONE,cv::Point());
+
+	cv::Mat new_contour = cv::Mat(512,640,CV_8UC3);
+	// for all contours
+	for(int c(0);c<contours.size();++c){
+		//check contours size
+		if(contours[c].size()>10){
+			for(int c1(0);c1<contours[c].size();++c1){
+				cv::Point tmp = (contours[c])[c1];
+
+				cv::line(new_contour,tmp,tmp,CV_RGB(255,255,255));
+			}
+		}
+	}
+	cv::Mat cont;
+	cv::cvtColor(new_contour,cont,CV_RGB2GRAY);
+	cv::imshow("hell yeah",cont);
+	init_Image = cont.clone();
+
+
 	//cv::cvtColor(init_Image,init_Image2,CV_GRAY2RGB);
 	//init_Image = init_Image2.clone();
 
@@ -795,15 +887,17 @@ for(int q(0);q<5;++q)
 		_LINES2D.push_back(res);
 	}*/
 
-	sortLines3D();
+	int thres = (int)_LINES.size()/2;//(int)(_LINES.size()/2)*0.15;
+	sortLines3D(thres);
+	_HITPOINTS = map<int,vector<Pnt2f> >();
 	double tx1, ty1, tz1;
 	double tx2, ty2, tz2;
 	// draw 2D-Lines
 	//define threshold for CP creation
-	int thres = (int)(_LINES.size()/2)*0.15;
+
 	cout << ">>>>>> "<<thres<<endl;
 	cv::flip(init_Image,init_Image,0);
-	for(int i(0);i<_LINES.size();i=i+2){
+	for(int i(0);i<thres;i=i+2){
 		// get 3D Line endings
 		Pnt3d p1 = _LINES[i];
 		Pnt3d p2 = _LINES[i+1];
@@ -833,13 +927,14 @@ for(int q(0);q<5;++q)
 		normal2[0]=lineNormal[1]/l;normal2[1]=-lineNormal[0]/l;
 
 		// draw line
-		cv::line(result,cv::Point(tx1,ty1),cv::Point(tx2,ty2),CV_RGB(255,0,0));
+		cv::line(result,cv::Point(tx1,ty1),cv::Point(tx2,ty2),CV_RGB(255,0,0),1);
 
 		//creating 2d controlpoints
 		//float t = createControlPoints2D(i,p1,p2);
 		//if(i <= thres){
 			//vector<Pnt2d> cp = _CP2D[i];
 			vector<Pnt3f> cp = _CONTROLPOINTS[i];
+			Pnt2f old_hit = Pnt2f(-1,0);
 			for(int j(0);j<cp.size();++j){
 				vector <Pnt2f> h;
 				//get single 3D-ControlPoint
@@ -858,31 +953,52 @@ for(int q(0);q<5;++q)
 				Pnt2f hit = checkNormal(tmp2d,normal1,init_Image);
 				Pnt2f hit1 = checkNormal(tmp2d,normal2,init_Image);
 
-				bool outlier = isOutlier(tmp2d, hit);
-				bool outlier2= isOutlier(tmp2d,hit1);
+				//cout << "hit" << hit <<endl;
 
+				bool outlier = isOutlier(tmp2d, hit,normal1,old_hit);
+				bool outlier2= isOutlier(tmp2d,hit1,normal1,old_hit);
+
+				/*if(outlier)
+					cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(255,255,255));
+
+				if(outlier2)
+					cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(255,255,255));
+*/
 				//drawing
 				if(outlier && outlier2){
+					//cout << "push0"<<endl;
 					(_HITPOINTS[i]).push_back(Pnt2f(-1,0));
 					continue;
 					}
 				else {
 					if(!outlier && !outlier2){
-						if(tmp.dist(hit)<tmp.dist(hit1)){
+						if(tmp2d.dist(hit)<tmp2d.dist(hit1)){
 							//cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,0));
+							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(255,255,255));
+					//		cout << "push1"<<endl;
 							(_HITPOINTS[i]).push_back(hit);
+							old_hit = hit;
 						}
 						else{
 							//cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(255,255,0));
+							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(255,255,255));
+					//		cout << "push2"<<endl;
 							(_HITPOINTS[i]).push_back(hit1);
+							old_hit = hit1;
 						}
 					} else if(!outlier){
 						//cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,0));
+					//	cout << "push1"<<endl;
 						(_HITPOINTS[i]).push_back(hit);
+						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(255,255,255));
+						old_hit = hit;
 						}
 						else {
 						//cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(255,255,0));
+					//	cout << "push2"<<endl;
 						(_HITPOINTS[i]).push_back(hit1);
+						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(255,255,255));
+						old_hit = hit1;
 						}
 					//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(tmp2d[0]+normal1[0],tmp2d[1]+normal1[1]),CV_RGB(0,255,0));
 					//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(tmp2d[0]+normal2[0],tmp2d[1]+normal2[1]),CV_RGB(0,255,0));
@@ -894,6 +1010,24 @@ for(int q(0);q<5;++q)
 
 
 	}
+	int countCP = 0;
+	//int thres = (int)(_LINES.size()/2)*0.15;
+	for(int i(0);i<thres;i=i+2){
+		//cout << "line : "<<i<<endl;
+		vector<Pnt3f> tmp = _CONTROLPOINTS[i];
+		vector<Pnt2f> tmp2 = _HITPOINTS[i];
+		for(int j(0);j<tmp.size();++j){
+			countCP++;
+			Pnt2f hitp = tmp2[j];
+			//cv::circle(result,cv::Point(hitp[0],hitp[1]),2,CV_RGB(255,255,0));
+			//cout << "Point "<< tmp2[j]<<endl;
+		//	cout << "3D-Point "<< tmp[j]<<endl;
+		}
+		//exit(1);
+	}
+	cout << "####CONTROLPOINTS>> "<< countCP<<endl;
+	countCP = 0;
+
 	cout << "#### LEV - MAR ###"<<endl;
 	for(int v(0);v<16;++v){
 		cout << " " << projection2[v];
@@ -902,7 +1036,9 @@ for(int q(0);q<5;++q)
 	}
 	cout << "================"<<endl;
 
-	int ret = dlevmar_dif(mapping,projection2,NULL,16,200,1000,NULL,NULL,NULL,NULL,NULL);
+	int ret;
+	//for(int go(0);go <=25	; ++go)
+		ret = dlevmar_dif(mapping,projection2,NULL,16,100,1000,NULL,NULL,NULL,NULL,NULL);
 
 	for(int v(0);v<16;++v){
 		cout << " " << projection2[v];
@@ -914,10 +1050,8 @@ for(int q(0);q<5;++q)
 	cout <<endl;
 	cout <<"iterated for: "<<ret<<endl;
 	cout << "#### LEV - MAR  - ENDE###"<<endl;
-	cout << "== HIT POINTS USED " << _HITPOINTS.size()<<endl;
+	//cout << "== HIT POINTS USED " << _HITPOINTS.size()<<endl;
 	drawModel(result,0,0,255);
-
-
 
 	//convert gray canny image back to rgb
 	cv::cvtColor(init_Image,init_Image2,CV_GRAY2RGB);
@@ -929,8 +1063,12 @@ for(int q(0);q<5;++q)
 	// save image
 	cv::imshow("showing image",result);
 	stringstream ss;
-	ss << time(0) << ".bmp";
+	ss << /*time(0)*/q << ".bmp";
 	cv::imwrite(ss.str(),result);
+	_CONTROLPOINTS.clear();
+	_HITPOINTS.clear();
+	_LINES.clear();
+}
 }
 }
 
@@ -974,17 +1112,28 @@ void mapping(double *p, double *x, int m, int n, void *data)
 	glMultMatrixd(p);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+//	glLoadIdentity();
+
+//glMultMatrixf(m);
+	float scalev = 1.3;
+	glScalef(scalev,scalev,scalev);
+
 	// project 3d point
 	//for ever line
 
 	//for(k=0;k<n;k++)
-	    for(int i(0);i<_LINES.size();++i){
+	int thres = (int)(_LINES.size()/2)*0.1;
+	int count(0);
+	    for(int i(0);i<thres;i=i+2){
+		   // cout << "for line no: >>>> "<<i<<endl;
 		// get hitpoints by line
 		vector<Pnt2f> hitpoints = _HITPOINTS[i];
 		//for every controlpoint
 		vector<Pnt3f> cps = _CONTROLPOINTS[i];
 		for(int j(0);j<cps.size();++j){
+
 			Pnt2f hit = hitpoints[j];
+			//cout << "hit >> "<<hit<<endl;
 			if(hit[0] == -1)
 				continue;
 			Pnt3f cp = cps[j];
@@ -997,27 +1146,42 @@ void mapping(double *p, double *x, int m, int n, void *data)
 			Pnt2d tmp2d;
 			tmp2d[0] = x1;
 			tmp2d[1] = y;
-			//cout << "CP 2d" << tmp2d <<endl;
+			//cout << "CP 3d" << tmp2d <<endl;
 			//cout << "HP 2d" << hit<<endl;
 			float length = hit.dist(tmp2d);
 			//cout << (double)length <<endl;
-			if(i*j > n)
+			if(count > n)
 				continue;
-			x[i*j] = (double)length;
+			x[count] = (double)length;
+
+			count++;
 		}
 	}
 }
 
-bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint){
+bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_CP){
 	if(hitPoint[0] == -1)
 		return true;
 	Pnt2f vec = controlPoint-hitPoint;
 	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 	//cout << length<<endl;
-	if(length > 30){
+	if(length > 5 /*&& length < 0.1*/){
 		//cout << "outlier" <<endl;
 		return true;
 	}
+
+	if(old_CP[0] != -1){
+		Pnt2f lineNormal2D = hitPoint-old_CP;
+		float dot = lineNormal2D[0]*lineNormal3D[0]+lineNormal2D[1]*lineNormal3D[1];
+		//cout << cos(dot)<<endl;
+		if(cos(dot) > 0.95){
+
+			return true;
+		}
+
+	}
+
+
 	return false;
 }
 
@@ -1032,7 +1196,7 @@ Pnt2f checkNormal(Pnt2d controlPoint, Pnt2f normal, cv::Mat picture){
 	while((x > 0 && y >0) && (x<640 && y < 512)){
 		i++;
 		Pnt2f tmp;
-		tmp[0]= controlPoint[0] + normal[0]* 0.01 * i;
+		tmp[0]= controlPoint[0] + normal[0] * 0.01 * i;
 		tmp[1]=controlPoint[1] + normal[1]* 0.01 * i;
 		if(x == (int)tmp[0] && y == (int)tmp[1])
 			continue;
@@ -1087,7 +1251,7 @@ float createControlPoints2D(int i, Pnt2d p1, Pnt2d p2)
 	return length;// result;
 }
 
-vector<Pnt3f> createControlPoints(int lineIndex, Pnt3f p1, Pnt3f p2){
+vector<Pnt3f> createControlPoints(int lineIndex, Pnt3f p1, Pnt3f p2, int thres){
 	vector<Pnt3f> result;
 	Vec3f vec = p2 - p1;
 	// calculate length
@@ -1096,7 +1260,7 @@ vector<Pnt3f> createControlPoints(int lineIndex, Pnt3f p1, Pnt3f p2){
 		return result;
 
 	//every 5% of the line
-	float stepsize = 0.025;
+	float stepsize = 0.01  / thres;
 	for(int i(0);i*stepsize <= 1;i++)
 	{
 		//cout << " cp at ->"<< p1+i*step*vec;
@@ -1143,7 +1307,7 @@ void sortLines(){
 }
 
 
-void sortLines3D(){
+void sortLines3D(int thres){
 	map<int, float> lengths;
 	map<int,float>::iterator mip;
 	vector<Pnt3f> result;
@@ -1172,8 +1336,13 @@ void sortLines3D(){
 	}
 	_LINES = result;
 	_CONTROLPOINTS.clear();
-	for(int i(0);i<_LINES.size();i=i+2){
-		createControlPoints(i,_LINES[i],_LINES[i+1]);
+	int lineNumber = (int)_LINES.size()*0.015;
+	cout << "line Threshold to create ControlPoints >> "<< lineNumber<<endl;
+	for(int i(0);i<thres/*_LINES.size()*/;i=i+2){
+		if(i<lineNumber)
+			createControlPoints(i,_LINES[i],_LINES[i+1],50);
+		else
+			createControlPoints(i,_LINES[i],_LINES[i+1],25);
 	}
 }
 
@@ -1181,6 +1350,8 @@ int setupGLUT(int *argc, char *argv[])
 {
     glutInit(argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
+glutInitWindowSize(640,512);
+
 
     int winid = glutCreateWindow("OpenSG First Application");
 
@@ -1189,8 +1360,10 @@ int setupGLUT(int *argc, char *argv[])
 
     glutDisplayFunc(renderScene);
     //glutIdleFunc(renderScene);
+
+    //glutReshapeWindow(640,512);
     glutReshapeFunc(reshape);
-    glutReshapeWindow(640,512);
+
 
     return winid;
 }
