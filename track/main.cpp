@@ -90,7 +90,7 @@ vector<Pnt3d> _LINES2D;
 GLdouble _m[16] = {0.806114 ,0.533122 , 0.256828 ,0,
 		-0.422132,0.822216 ,-0.381792 ,0,
 		-0.41471,0.199353,0.887848,0,
-		0.0,-1.906,-9.455,1
+		-0.05,-2.106,-9.455,1
 
 };
 
@@ -581,9 +581,9 @@ void display(void)
 }
 
 void renderScene(void) {
-for(int q(1);q<=10;++q)
+for(int q(1);q<=50;++q)
 {
-for(int fu(0);fu<7;++fu){
+for(int fu(0);fu<5;++fu){
 	int window_w = 640;
 	int window_h = 512;
 
@@ -1048,7 +1048,7 @@ for(int fu(0);fu<7;++fu){
 
 	int ret;
 	//for(int go(0);go <=25	; ++go)
-		ret = dlevmar_dif(mapping,_m,NULL,16,100,1000,NULL,NULL,NULL,NULL,NULL);
+		ret = dlevmar_dif(mapping,_m,NULL,16,400,1000,NULL,NULL,NULL,NULL,NULL);
 
 	for(int v(0);v<16;++v){
 		cout << " " << projection2[v];
@@ -1114,19 +1114,18 @@ void mapping(double *p, double *x, int m, int n, void *data)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-gluPerspective (52, (GLfloat)640 / (GLfloat)512, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
+	gluPerspective (52, (GLfloat)640 / (GLfloat)512, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
 	float tmp_m[16];
 	for(int t(0);t<16;++t)
-		tmp_m[t] = _m[t];
+		tmp_m[t] = p[t];
 
 	glMultMatrixf(tmp_m);
 	// load new matrix
 	//glMultMatrixd(p);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-//	glLoadIdentity();
 
-//glMultMatrixf(m);
+	//glMultMatrixf(m);
 	float scalev = 1.3;
 	glScalef(scalev,scalev,scalev);
 
@@ -1157,7 +1156,7 @@ gluPerspective (52, (GLfloat)640 / (GLfloat)512, 0.1, 30.0); //set the perspecti
 				//cout << "Line: "<<i<< " CP: " <<j << "point: " <<cp<<endl;
 			double x1,y,z;
 			gluProject(cp[0], cp[1], cp[2],
-				modelview, _m, viewport,
+				modelview, projection2, viewport,
 				&x1,&y,&z);
 			Pnt2d tmp2d;
 			tmp2d[0] = x1;
@@ -1181,7 +1180,7 @@ bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 	Pnt2f vec = controlPoint-hitPoint;
 	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 	//cout << length<<endl;
-	if(length > 10 /*&& length < 0.1*/){
+	if(length > 5 /*&& length < 0.1*/){
 		//cout << "outlier" <<endl;
 		return true;
 	}
@@ -1360,7 +1359,7 @@ void sortLines3D(int thres){
 		else if(i < lineNumber*2)
 			createControlPoints(i,_LINES[i],_LINES[i+1],25);
 		else
-			createControlPoints(i,_LINES[i],_LINES[i+1],2);
+			createControlPoints(i,_LINES[i],_LINES[i+1],5);
 	}
 }
 
