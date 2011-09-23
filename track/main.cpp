@@ -87,6 +87,13 @@ vector<Pnt2d> _NORMALS;
 vector<Pnt3f> _LINES;
 vector<Pnt3d> _LINES2D;
 
+GLdouble _m[16] = {0.806114 ,0.533122 , 0.256828 ,0,
+		-0.422132,0.822216 ,-0.381792 ,0,
+		-0.41471,0.199353,0.887848,0,
+		0.0,-1.906,-9.455,1
+
+};
+
 int main(int argc, char *argv[])
 {/*
     int j = 0;
@@ -472,7 +479,7 @@ void reshape (int w, int h)
 	glLoadIdentity();
 
 	gluPerspective (52, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
-glLoadIdentity();
+	//glLoadIdentity();
 	float m2[16] = {0.9132,0.3692,-0.1720,0,
 		      -0.3475,0.9265,0.1437,0,
 		      0.2123,-0.0714,0.9745,0,
@@ -504,7 +511,7 @@ glLoadIdentity();
 	};
 
 
-	float m_79dist[16] = {0.83454 ,-0.0234424 , -0.550449 ,0,
+	float mdist[16] = {0.83454 ,-0.0234424 , -0.550449 ,0,
 			-0.0484908,0.992092 ,-0.115768 ,0,
 			0.54881,0.123305,0.826803,0,
 			0.317,-1.657,-8.929,1
@@ -518,7 +525,7 @@ glLoadIdentity();
 
 	};
 
-	float m_OLD[16] = {0.806114 ,0.533122 , 0.256828 ,0,
+	float m_9[16] = {0.806114 ,0.533122 , 0.256828 ,0,
 			-0.422132,0.822216 ,-0.381792 ,0,
 			-0.41471,0.199353,0.887848,0,
 			0.0,-1.906,-9.455,1
@@ -526,7 +533,7 @@ glLoadIdentity();
 	};
 
 	//generated
-	float m[16] = {	1.32222, 1.1274, -0.198695, -0.256828,
+	float m_00[16] = {	1.32222, 1.1274, -0.198695, -0.256828,
 			-0.688105, 1.61599, 0.28491, 0.381792,
 			-0.709301, 0.226619, -0.898599, -0.887848,
 			-0.255447, -3.91252, 9.42976, 9.455
@@ -542,7 +549,11 @@ glLoadIdentity();
 	*/
 
 
-glMultMatrixf(m);
+	float tmp_m[16];
+	for(int tmp(0);tmp<16;++tmp)
+		tmp_m[tmp] = _m[tmp];
+
+	glMultMatrixf(tmp_m);
 
 	/*
  float m[16] = {	0.884392,-0.302862,0.355192,0,
@@ -570,9 +581,9 @@ void display(void)
 }
 
 void renderScene(void) {
-for(int q(1);q<200;++q)
+for(int q(1);q<=10;++q)
 {
-for(int fu(0);fu<1;++fu){
+for(int fu(0);fu<7;++fu){
 	int window_w = 640;
 	int window_h = 512;
 
@@ -836,7 +847,6 @@ for(int fu(0);fu<1;++fu){
 	}
 	cv::Mat cont;
 	cv::cvtColor(new_contour,cont,CV_RGB2GRAY);
-	cv::imshow("hell yeah",cont);
 	init_Image = cont.clone();
 
 
@@ -1038,7 +1048,7 @@ for(int fu(0);fu<1;++fu){
 
 	int ret;
 	//for(int go(0);go <=25	; ++go)
-		ret = dlevmar_dif(mapping,projection2,NULL,16,100,1000,NULL,NULL,NULL,NULL,NULL);
+		ret = dlevmar_dif(mapping,_m,NULL,16,100,1000,NULL,NULL,NULL,NULL,NULL);
 
 	for(int v(0);v<16;++v){
 		cout << " " << projection2[v];
@@ -1063,7 +1073,7 @@ for(int fu(0);fu<1;++fu){
 	// save image
 	cv::imshow("showing image",result);
 	stringstream ss;
-	ss << /*time(0)*/q << ".bmp";
+	ss << time(0) << ".bmp";
 	cv::imwrite(ss.str(),result);
 	_CONTROLPOINTS.clear();
 	_HITPOINTS.clear();
@@ -1102,14 +1112,16 @@ void mapping(double *p, double *x, int m, int n, void *data)
 	GLdouble modelview[16], projection2[16];
 	GLint viewport[4];
 
-	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
-	glGetDoublev(GL_PROJECTION_MATRIX, projection2);
-	glGetIntegerv(GL_VIEWPORT, viewport);
-
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
+gluPerspective (52, (GLfloat)640 / (GLfloat)512, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
+	float tmp_m[16];
+	for(int t(0);t<16;++t)
+		tmp_m[t] = _m[t];
+
+	glMultMatrixf(tmp_m);
 	// load new matrix
-	glMultMatrixd(p);
+	//glMultMatrixd(p);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 //	glLoadIdentity();
@@ -1118,11 +1130,15 @@ void mapping(double *p, double *x, int m, int n, void *data)
 	float scalev = 1.3;
 	glScalef(scalev,scalev,scalev);
 
+	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX, projection2);
+	glGetIntegerv(GL_VIEWPORT, viewport);
+
 	// project 3d point
 	//for ever line
 
 	//for(k=0;k<n;k++)
-	int thres = (int)(_LINES.size()/2)*0.1;
+	int thres = (int)(_LINES.size()/2);/*0.1*;*/
 	int count(0);
 	    for(int i(0);i<thres;i=i+2){
 		   // cout << "for line no: >>>> "<<i<<endl;
@@ -1141,7 +1157,7 @@ void mapping(double *p, double *x, int m, int n, void *data)
 				//cout << "Line: "<<i<< " CP: " <<j << "point: " <<cp<<endl;
 			double x1,y,z;
 			gluProject(cp[0], cp[1], cp[2],
-				modelview, projection2, viewport,
+				modelview, _m, viewport,
 				&x1,&y,&z);
 			Pnt2d tmp2d;
 			tmp2d[0] = x1;
@@ -1165,7 +1181,7 @@ bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 	Pnt2f vec = controlPoint-hitPoint;
 	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 	//cout << length<<endl;
-	if(length > 5 /*&& length < 0.1*/){
+	if(length > 10 /*&& length < 0.1*/){
 		//cout << "outlier" <<endl;
 		return true;
 	}
@@ -1341,8 +1357,10 @@ void sortLines3D(int thres){
 	for(int i(0);i<thres/*_LINES.size()*/;i=i+2){
 		if(i<lineNumber)
 			createControlPoints(i,_LINES[i],_LINES[i+1],50);
-		else
+		else if(i < lineNumber*2)
 			createControlPoints(i,_LINES[i],_LINES[i+1],25);
+		else
+			createControlPoints(i,_LINES[i],_LINES[i+1],2);
 	}
 }
 
