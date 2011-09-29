@@ -87,12 +87,24 @@ vector<Pnt2d> _NORMALS;
 vector<Pnt3f> _LINES;
 vector<Pnt3d> _LINES2D;
 
-int _CP = 400;
+Pnt2d _FIX = Pnt2d(-1,0);
+Pnt2d _FIX2 = Pnt2d(-1,0);
 
-GLdouble _m[16] = {0.806114 ,0.533122 , 0.256828 ,0,
+int _CP = 300;
+
+int CHECK_PIXEL = 25;
+
+/*GLdouble _m[16] = {0.806114 ,0.533122 , 0.256828 ,0,
 		-0.422132,0.822216 ,-0.381792 ,0,
 		-0.41471,0.199353,0.887848,0,
 		-0.05,-1.26,-9.455,1
+
+};*/
+
+GLdouble _m[16] = {0.806114 ,0.533122 , 0.256828 ,0,
+-0.422132,0.822216 ,-0.381792 ,0,
+-0.41471,0.199353,0.887848,0,
+-0.2,-2.306,-9.455,1
 
 };
 
@@ -392,7 +404,8 @@ int main(int argc, char *argv[])
 	//gwin->init();
 
 
-	OSG::NodePtr scene = SceneFileHandler::the().read("data/test3_4.obj");
+	OSG::NodePtr scene = SceneFileHandler::the().read("data/test__1.obj");
+	//OSG::NodePtr scene = SceneFileHandler::the().read("data/test3_4.obj");
 	//GroupPtr scene = GroupPtr::dcast(scene);
 
 
@@ -400,32 +413,8 @@ int main(int argc, char *argv[])
 
 	cout << "children in scene: " << scene->getNChildren()<<endl;
 
-	//for(int i(0);i < scene->getNChildren();++i)
-	//{
-/*		cout << "child no. "<<i<<endl;
-		cout << "type of child: "<<scene->getChild(i)->getTypeName()<<endl;
-		NodePtr child = scene->getChild(i);
-		cout << "children of child: " << child->getNChildren()<<endl;
-		cout << "type: " << child.getCore()->getTypeName()<<endl;
-*/		/*NodePtr child2 = child->getChild(0);
-		cout << "children of child2: " << child2->getNChildren()<<endl;
-		cout << "type: " << child2.getCore()->getTypeName()<<endl;
-		NodePtr child3 = child2->getChild(0);
-		cout << "children of child3: " << child3->getNChildren()<<endl;
-		cout << "type: " << child3.getCore()->getTypeName()<<endl;
-		NodePtr child4 = child3->getChild(0);
-		cout << "children of child4: " << child4->getNChildren()<<endl;
-		cout << "type: " << child4.getCore()->getTypeName()<<endl;
-*/
-		//NodePtr geo = child4;
-//		GeometryPtr geo = GeometryPtr::dcast(child->getCore());
 		GeometryPtr geo = GeometryPtr::dcast(scene->getCore());
 
-		FaceIterator it;
-
-//		GeometryPtr geom = Geometry::create();
-		GeoPositions3fPtr pos = GeoPositions3f::create();
-		GeoNormals3fPtr norms = GeoNormals3f::create();
 		GeoPTypesPtr type = GeoPTypesUI8::create();
 		type->addValue(GL_LINE);
 
@@ -434,24 +423,11 @@ int main(int argc, char *argv[])
 		TEST = geo;
 		for(lit = geo->beginLines();lit != geo->endLines();++lit){
 			lines++;
-			//cout << "pos1: " << lit.getPosition(0)<<endl;
-			//cout << "pos2: " << lit.getPosition(1)<<endl;
-			//cout << "wtf ?! "<<(lit.getPosition(0)).dist(lit.getPosition(1))<<endl;
-			if((lit.getPosition(0)).dist(lit.getPosition(1)) > 1){
-
-
-				cout << "GROßES BADABOOOM! >> "<<(lit.getPosition(0)).dist(lit.getPosition(1))<< endl;
-			}
 		}
 
 		cout << "lines: " << lines <<endl;
 		SimpleMaterialPtr mat = SimpleMaterial::create();
 		geo->setMaterial(mat);
-
-	//}
-	//NodePtr	root = calcVertexNormalsGeo(geom, 1.0);
-		//Matrix m;
-		//m.setIdentity();
 
 	// Create and setup our little friend - the SSM
 	mgr = new SimpleSceneManager;
@@ -506,21 +482,10 @@ void reshape (int w, int h)
 
 	glMultMatrixf(tmp_m);
 
-	/*
- float m[16] = {	0.884392,-0.302862,0.355192,0,
-		 -0.383418,-0.90528,0.182919,0,
-		 0.26616,-0.29796,-0.916722,0,
-		 0.225,0.277,-10,1};
-	  */
-
-
-	//glTranslatef(1,-4.5,0);
 	glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 	glLoadIdentity();
-	//glTranslatef(0,0,-4);
 
-//glMultMatrixf(m);
-	float scalev = 1.9;
+	float scalev = 1.5;
 	glScalef(scalev,scalev,scalev);
 
 }
@@ -532,16 +497,17 @@ void display(void)
 }
 
 void renderScene(void) {
-for(int q(1);q<=79;++q)
+for(int q(1);q<=200;++q)
 {
-for(int fu(0);fu<5;++fu){
-	int window_w = 1280;
-	int window_h = 1024;
+for(int fu(0);fu<3;++fu){
+	int window_w = 640;
+	int window_h = 480;
 
 	cout << "render scene... "<<endl;
 
 	TriangleIterator ti;
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -554,7 +520,7 @@ for(int fu(0);fu<5;++fu){
 	for(ti = TEST->beginTriangles();ti != TEST->endTriangles();++ti)
 	{
 		int rgb_index = 0;
-		int r,g,b;
+		int r(0),g(0),b(0);
 		while(_COLORS[rgb_index] != NULL)
 		{
 			// create random color
@@ -761,7 +727,7 @@ for(int fu(0);fu<5;++fu){
 
 	//open cv
 	stringstream stream;
-	stream << "pics/undist/resize/";
+	stream << "pics/";
 	stream << q;
 	stream << ".bmp";
 	/*"pics/1_1.bmp"*/
@@ -784,7 +750,7 @@ for(int fu(0);fu<5;++fu){
 	vector<vector<cv::Point> > new_contours;
 	cv::findContours(init_Image,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE,cv::Point());
 
-	cv::Mat new_contour = cv::Mat(1024,1280,CV_8UC3);
+	cv::Mat new_contour = cv::Mat(480,640,CV_8UC3);
 	// for all contours
 	for(int c(0);c<contours.size();++c){
 		int size = (contours[c]).size();
@@ -831,8 +797,8 @@ for(int fu(0);fu<5;++fu){
 	cv::flip(ogl,ogl,0);
 
 	CvSize size2;
-	size2.height=1024;
-	size2.width=1280;
+	size2.height=480;
+	size2.width=640;
 	cv::Mat result = cv::Mat(size2,CV_8UC3);//= (cv::Mat)cvCreateImage(size2,8,3);
 
 	//MY 2D-POINTS
@@ -913,9 +879,45 @@ for(int fu(0);fu<5;++fu){
 			vector<Pnt3f> cp = _CONTROLPOINTS[i];
 			Pnt2f old_hit = Pnt2f(-1,0);
 			for(int j(0);j<cp.size();++j){
-				vector <Pnt2f> h;
 				//get single 3D-ControlPoint
 				Pnt3d tmp = cp[j];
+				//cout <<"i: "<<i<<" j: "<< j<<endl;
+				// fixpoint check!
+				if(i==0){
+					if(_FIX[0] == -1){
+						double x,y,z;
+						gluProject(tmp[0], tmp[1], tmp[2],
+							modelview, projection2, viewport,
+							&x,&y,&z);
+						//Pnt2d tmp2d;
+						_FIX[0] = x;
+						_FIX[1] = y;
+
+					//	cout << "::: "<< (_HITPOINTS[0]).size()<<endl;
+					}
+					(_HITPOINTS[0]).push_back(_FIX);
+					cv::circle(result,cv::Point(_FIX[0],_FIX[1]),3,CV_RGB(255,255,0),2);
+					continue;
+				}
+				/*if(i==2){
+					if(_FIX2[0] == -1){
+						double x,y,z;
+						gluProject(tmp[0], tmp[1], tmp[2],
+							modelview, projection2, viewport,
+							&x,&y,&z);
+						//Pnt2d tmp2d;
+						_FIX2[0] = x;
+						_FIX2[1] = y;
+
+					//	cout << "::: "<< (_HITPOINTS[0]).size()<<endl;
+					}
+					(_HITPOINTS[1]).push_back(_FIX2);
+					cv::circle(result,cv::Point(_FIX2[0],_FIX2[1]),3,CV_RGB(255,255,0),2);
+					continue;
+				}*/
+				//cout << "::: "<< (_HITPOINTS[1]).size()<<endl;
+				//cout << "::: "<< (_HITPOINTS[0]).size()<<endl;
+				//exit(0);
 				// project to 2D
 				double x,y,z;
 				gluProject(tmp[0], tmp[1], tmp[2],
@@ -924,6 +926,8 @@ for(int fu(0);fu<5;++fu){
 				Pnt2d tmp2d;
 				tmp2d[0] = x;
 				tmp2d[1] = y;
+				// CONTROLPOINTS DRAWING
+				//cv::circle(result,cv::Point(x,y),2,CV_RGB(100,100,100),2);
 
 				//Pnt2f n1 = _NORMALS[i];
 				//Pnt2f n2 = _NORMALS[i+1];
@@ -939,41 +943,54 @@ for(int fu(0);fu<5;++fu){
 				if(outlier && outlier2){
 					//ok++;
 					(_HITPOINTS[i]).push_back(Pnt2f(-1,0));
+					//cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,255),3);
+					//cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(0,255,255),3);
 					continue;
 					}
 				else {
 					ok++;
 					if(!outlier && !outlier2){
 						if(tmp2d.dist(hit)<tmp2d.dist(hit1)){
-							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(255,255,255),3);
+							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(255,255,255),1);
 							(_HITPOINTS[i]).push_back(hit);
 							old_hit = hit;
+							//cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(0,255,255),3);
 						}
 						else{
-							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(255,255,255),3);
+							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(255,255,255),1);
 							(_HITPOINTS[i]).push_back(hit1);
 							old_hit = hit1;
+							//cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,255),3);
 						}
 					} else if(!outlier){
 						(_HITPOINTS[i]).push_back(hit);
-						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(255,255,255),3);
+						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(255,255,255),1);
 						old_hit = hit;
+						//cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(0,255,255),3);
 						}
 						else {
 						(_HITPOINTS[i]).push_back(hit1);
-						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(255,255,255),3);
+						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(255,255,255),1);
 						old_hit = hit1;
+						//cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,255),3);
 						}
 					//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(tmp2d[0]+normal1[0],tmp2d[1]+normal1[1]),CV_RGB(0,255,0));
 					//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(tmp2d[0]+normal2[0],tmp2d[1]+normal2[1]),CV_RGB(0,255,0));
 				}
 
 			}
+
+			vector<Pnt2f> t_vec = _HITPOINTS[i];
+			if(t_vec.size() < 5){
+				_CONTROLPOINTS[i].clear();
+				_HITPOINTS[i].clear();
+			}
+			cout << i<<"::: "<< (_HITPOINTS[i]).size()<<endl;
 			//cout << ":::"<<ok<<endl;
 			// clear if not enough hitpoints on line
-			if(ok < 3){
-				(_HITPOINTS[i]).clear();
-				cout << "clear hitlist"<< endl;
+			if(ok < 3 && i != 0){
+				//(_HITPOINTS[i]).clear();
+				//cout << "clear hitlist"<< endl;
 			}
 	}
 	int countCP = 0;
@@ -1071,10 +1088,15 @@ void mapping(double *p, double *x, int m, int n, void *data)
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective (52, (GLfloat)1280 / (GLfloat)1024, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
+	gluPerspective (52, (GLfloat)640 / (GLfloat)480, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
 	float tmp_m[16];
-	for(int t(0);t<16;++t)
-		tmp_m[t] = p[t];
+	for(int t(0);t<16;++t){
+		//if(t<=7)
+		//	tmp_m[t] = 0.1*p[t];
+		//else
+			tmp_m[t] = p[t];
+
+	}
 
 	glMultMatrixf(tmp_m);
 	// load new matrix
@@ -1083,7 +1105,7 @@ void mapping(double *p, double *x, int m, int n, void *data)
 	glLoadIdentity();
 
 	//glMultMatrixf(m);
-	float scalev = 1.9;
+	float scalev = 1.5;
 	glScalef(scalev,scalev,scalev);
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
@@ -1095,17 +1117,29 @@ void mapping(double *p, double *x, int m, int n, void *data)
 
 	int thres = (int)(_LINES.size());/*0.1*;*/
 	int count(0);
-	    for(int i(0);i<thres;i=i+2){
-		   // cout << "for line no: >>>> "<<i<<endl;
+	/*int test = rand()%7;
+	while(test != 0 || test!=2 || test !=4||test!=6)
+		test = rand()%7;
+*/
+	for(int i(0);i<thres;i=i+2){
+
 		// get hitpoints by line
 		vector<Pnt2f> hitpoints = _HITPOINTS[i];
+		/*if(hitpoints.size()>10){
+			int t = rand() % 2;
+			if(t == 0)
+				continue;
+		}*/
+		if(hitpoints.empty())
+			continue;
+		// jump over small lines
 		if(hitpoints.size()<5)
 			continue;
+
 		//for every controlpoint
 		vector<Pnt3f> cps = _CONTROLPOINTS[i];
 		for(int j(0);j<cps.size();++j){
 			Pnt2f hit = hitpoints[j];
-			//cout << "hit >> "<<hit<<endl;
 			if(hit[0] == -1)
 				continue;
 			Pnt3f cp = cps[j];
@@ -1119,17 +1153,26 @@ void mapping(double *p, double *x, int m, int n, void *data)
 			tmp2d[1] = y;
 
 			float length = hit.dist(tmp2d);
+
+			if(i <1){
+				length = _FIX.dist(tmp2d);
+			}
+
 			if(count > n)
 				continue;
 			x[count] = (double)length*(double)length;
 
 			count++;
+
 		}
 		if(count < n && i>=thres){
 			cout << "dammit...not enough points...start over!!"<<endl;
 			i = 0;
 		}
+		hitpoints.clear();
+		cps.clear();
 	}
+	    //exit(0);
 }
 
 bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_CP){
@@ -1139,9 +1182,9 @@ bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 	//cout << length<<endl;
 
-	int test = 9;
+	int test = 5;
 	if(controlPoint[1] > 700)
-		test = 15;
+		test = 5;
 
 	if(length > test /*&& length < 0.1*/){
 		//cout << "outlier" <<endl;
@@ -1152,7 +1195,8 @@ bool isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 		Pnt2f lineNormal2D = hitPoint-old_CP;
 		float dot = lineNormal2D[0]*lineNormal3D[0]+lineNormal2D[1]*lineNormal3D[1];
 		//cout << cos(dot)<<endl;
-		if(cos(dot) > 0.99){
+
+		if(dot > 0.95){
 
 			return true;
 		}
@@ -1173,7 +1217,7 @@ Pnt2f checkNormal(Pnt2d controlPoint, Pnt2f normal, cv::Mat picture){
 	float min(MAXFLOAT);
 	int i(0);
 
-	while((x > 0 && y >0) && (x<1280 && y < 1024)){
+	while((x > 0 && y >0) && (x<640 && y < 480)){
 		i++;
 		Pnt2f tmp;
 		tmp[0]= controlPoint[0] + normal[0] * 0.01 * i;
@@ -1235,7 +1279,13 @@ vector<Pnt3f> createControlPoints(int lineIndex, Pnt3f p1, Pnt3f p2, int thres){
 	vector<Pnt3f> result;
 	Vec3f vec = p2 - p1;
 
-	/*//MY 2D-POINTS
+	//cout << "start: "<<p1<<endl;
+	//cout << "end: "<<p2<<endl;
+
+	float len3D = p1.dist(p2);
+	//cout <<"len3d: "<< len3D<<endl;
+
+	//MY 2D-POINTS
 	GLdouble modelview[16], projection2[16];
 	GLint viewport[4];
 
@@ -1248,51 +1298,86 @@ vector<Pnt3f> createControlPoints(int lineIndex, Pnt3f p1, Pnt3f p2, int thres){
 		modelview, projection2, viewport,
 		&x,&y,&z);
 	Pnt2d tmp2d;
-	tmp2d[0] = x1;
+	tmp2d[0] = x;
 	tmp2d[1] = y;
 	double x1,y1,z1;
-	gluProject(p1[0], p1[1], p1[2],
+	gluProject(p2[0], p2[1], p2[2],
 		modelview, projection2, viewport,
 		&x1,&y1,&z1);
 	Pnt2d tmp2d1;
-	tmp2d[0] = x1;
-	tmp2d[1] = y;
+	tmp2d1[0] = x1;
+	tmp2d1[1] = y1;
 
-	if(){
+	// length of 2D edge
+	float len2D = tmp2d.dist(tmp2d1);
+	float stepsize;
 
-	}
-*/
-
-
-
-	// calculate length
-	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
-	//cout << "::: " << length<<endl;
-	if (length < 1)
+	if(len2D < 10)
 		return result;
 
+	if(len2D > 100){
+	//cout << "len2d: " << len2D<<endl;
+	float perc = CHECK_PIXEL * 100 / len2D;
+	//cout << "perc: "<<perc<<endl;
+
+	stepsize = /*len3D */ perc / 100 / thres;}
+		else {
+			stepsize = 0.5 /thres;
+		}
+	// calculate length
+	//float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]);
+
+	//cout << "::: " << length<<endl;
+	//if (len3D < 0.1)
+	//	return result;
+
 	//every 5% of the line
-	float random = (rand() % 20) * 0.01 + 0.1;
-	//cout << ":::"<<random<<endl;
-	float stepsize = 0.5  / thres;
+	//float stepsize = 0.5  / thres;
+	//float stepsize = (len3D * 0.05) / perc;
+	stepsize = stepsize;
+	//cout << "stepsize: " << stepsize<<endl;
+
+	float high = tmp2d[1]-tmp2d1[1];
+	cout << "high: "<<high<<endl;
+	if(-10 < high && high < 10 && stepsize < 0.25){
+		return result;
+		stepsize = stepsize * 2;
+	}
 	//float stepsize = random / thres;
 	for(int i(1);i*stepsize <= 1;i++)
 	{
+	//cout << "fuu: "<< i*stepsize<<endl;
 		//cout << " cp at ->"<< p1+i*step*vec;
 		Pnt3f np;
 		np[0] = p1[0] + (stepsize*i) * vec[0];
 		np[1] = p1[1] + (stepsize*i) * vec[1];
 		np[2] = p1[2] + (stepsize*i) * vec[2];
+
+		// stop - in case of longer line calc
+		//if((stepsize*i) >= len3D)
+		//	break;
+
 		//cout << np[0] << " " << np[1] << " " << np[2] <<endl;
 		//_CONTROLPOINTS.push_back(np);
-		result.push_back(np);
-		if(thres>3)
+
+
+		if(rand()%3 == 0)
 			result.push_back(np);
+		//if(thres>7)
+		//	result.push_back(np);
+
+		//if(-10 < high < 10 && stepsize >= 0.25 )
+		//	result.push_back(np);
+
 	}
-	if(result.size() < 10)
-		result.clear();
+
+
+
+	//if(result.size() < 10)
+	//	result.clear();
 
 	_CONTROLPOINTS[lineIndex] = result;
+	//exit(0);
 	return result;
 }
 
@@ -1326,8 +1411,19 @@ void sortLines(){
 	_LINES2D = result;
 }
 
+void createFixPoints(){
+	vector<Pnt3f> vec;
+	for(int i(0);i<50;++i){
+		vec.push_back(Pnt3f(-0.141,-1.263,0.227));
+	}
+	_CONTROLPOINTS[0] = vec;
+	for(int i(0);i<50;++i){
+		vec.push_back(Pnt3f(-0.141,-1.263,-0.227));
+	}
+	_CONTROLPOINTS[1] = vec;
+}
 
-void	sortLines3D(int thres){
+void sortLines3D(int thres){
 	map<int, float> lengths;
 	map<int,float>::iterator mip;
 	vector<Pnt3f> result;
@@ -1356,9 +1452,11 @@ void	sortLines3D(int thres){
 	}
 	_LINES = result;
 	_CONTROLPOINTS.clear();
-	int lineNumber = (int)_LINES.size()*0.01;
+	_HITPOINTS.clear();
+	createFixPoints();
+	int lineNumber = (int)_LINES.size()*0.005;
 	cout << "line Threshold to create ControlPoints >> "<< lineNumber<<endl;
-	for(int i(0);i<thres/*_LINES.size()*/;i=i+2){
+	for(int i(2);i<thres/*_LINES.size()*/;i=i+2){
 		/*int old_i = i;
 		i = rand() % _LINES.size();
 		if(i %2 != 0 && i+1<=_LINES.size())
@@ -1367,13 +1465,13 @@ void	sortLines3D(int thres){
 			i--;
 */
 		if(i<lineNumber){
-			createControlPoints(i,_LINES[i],_LINES[i+1],10);
+			createControlPoints(i,_LINES[i],_LINES[i+1],5);
 			//createControlPoints(i,_LINES[i],_LINES[i+1],5);
 		}
 		else if(i < lineNumber*2)
 			createControlPoints(i,_LINES[i],_LINES[i+1],3);
 		else
-			createControlPoints(i,_LINES[i],_LINES[i+1],1);
+			createControlPoints(i,_LINES[i],_LINES[i+1],2);
 
 		//i =old_i;
 		// check number of CP per line
@@ -1400,7 +1498,7 @@ int setupGLUT(int *argc, char *argv[])
 {
 	glutInit(argc, argv);
 	glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-	glutInitWindowSize(1280,1024);
+	glutInitWindowSize(640,480);
 
 
 	int winid = glutCreateWindow("OpenSG First Application");
