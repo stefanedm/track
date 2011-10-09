@@ -644,13 +644,7 @@ for(int fu(0);fu<2;++fu){
 
 		FaceIterator nit;
 		glBegin(GL_LINES);
-		//glColor3f(1.0,0,0);
-		float r(0),g(0),b2(0);
-		// create random color
-		//r = (int)rand() % 255;
-		//g = (int)rand() % 255;
-		//b2 = (int)rand() % 255;
-		//glColor3f(r,g,b2);
+		glColor3f(1.0,0,0);
 		for(nit = TEST->beginFaces();nit != TEST->endFaces();++nit)
 		{
 
@@ -664,10 +658,6 @@ for(int fu(0);fu<2;++fu){
 			if(a == a2 || a == b2 || a == c2)
 				if(b == a2 || b == b2 || b == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
-						r = ((int)rand() % 255);
-						g = ((int)rand() % 255);
-						b2 = ((int)rand() % 255);
-						glColor3f(r/255,g/255,b2/255);
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
@@ -681,10 +671,6 @@ for(int fu(0);fu<2;++fu){
 			if(a == a2 || a == b2 || a == c2)
 				if(c == a2 || c == b2 || c == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
-						r = ((int)rand() % 255);
-						g = ((int)rand() % 255);
-						b2 = ((int)rand() % 255);
-						glColor3f(b2/255,g/255,r/255);
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
@@ -698,10 +684,6 @@ for(int fu(0);fu<2;++fu){
 			if(c == a2 || c == b2 || c == c2)
 				if(b == a2 || b == b2 || b == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
-						r = ((int)rand() % 255);
-						g = ((int)rand() % 255);
-						b2 = ((int)rand() % 255);
-						glColor3f(r/255,g/255,b2/255);
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
@@ -821,7 +803,7 @@ for(int fu(0);fu<2;++fu){
 	ogl.data = pixels2;
 
 	cv::flip(ogl,ogl,0);
-	cv::imwrite("test45.bmp",ogl);
+	//cv::imwrite("test45.bmp",ogl);
 
 	CvSize size2;
 	size2.height=1024;
