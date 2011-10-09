@@ -97,12 +97,21 @@ int _CP = 500;
 int CHECK_PIXEL = 5;
 
 // initialization matrix
+//frame 1
 GLdouble _m[16] = {0.806114 ,0.533122 , 0.256828 ,0,
 		-0.422132,0.822216 ,-0.381792 ,0,
 		-0.41471,0.199353,0.887848,0,
 		-0.05,-1.16,-9.455,1
 
 };
+
+//frame 70
+/*GLdouble _m[16] = {0.806142 ,0.16366 , 0.568639 ,0,
+		-0.140773,0.986443 ,-0.0843392 ,0,
+		-0.574733,-0.0120595,0.818252,0,
+		0.8045,-0.556,-9.020,1
+
+};*/
 
 
 
@@ -495,9 +504,9 @@ void display(void)
 }
 
 void renderScene(void) {
-for(int q(1);q<=200;++q)
+for(int q(1);q<=10;++q)
 {
-for(int fu(0);fu<1;++fu){
+for(int fu(0);fu<2;++fu){
 	int window_w = 1280;
 	int window_h = 1024;
 
@@ -635,9 +644,16 @@ for(int fu(0);fu<1;++fu){
 
 		FaceIterator nit;
 		glBegin(GL_LINES);
-		glColor3f(1.0,0,0);
+		//glColor3f(1.0,0,0);
+		float r(0),g(0),b2(0);
+		// create random color
+		//r = (int)rand() % 255;
+		//g = (int)rand() % 255;
+		//b2 = (int)rand() % 255;
+		//glColor3f(r,g,b2);
 		for(nit = TEST->beginFaces();nit != TEST->endFaces();++nit)
 		{
+
 			if(fit.getIndex() == nit.getIndex())
 				continue;
 			int a2 = nit.getPositionIndex(0);
@@ -648,6 +664,10 @@ for(int fu(0);fu<1;++fu){
 			if(a == a2 || a == b2 || a == c2)
 				if(b == a2 || b == b2 || b == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						r = ((int)rand() % 255);
+						g = ((int)rand() % 255);
+						b2 = ((int)rand() % 255);
+						glColor3f(r/255,g/255,b2/255);
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
@@ -661,6 +681,10 @@ for(int fu(0);fu<1;++fu){
 			if(a == a2 || a == b2 || a == c2)
 				if(c == a2 || c == b2 || c == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						r = ((int)rand() % 255);
+						g = ((int)rand() % 255);
+						b2 = ((int)rand() % 255);
+						glColor3f(b2/255,g/255,r/255);
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
@@ -674,6 +698,10 @@ for(int fu(0);fu<1;++fu){
 			if(c == a2 || c == b2 || c == c2)
 				if(b == a2 || b == b2 || b == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
+						r = ((int)rand() % 255);
+						g = ((int)rand() % 255);
+						b2 = ((int)rand() % 255);
+						glColor3f(r/255,g/255,b2/255);
 						count_lines_drawn++;
 						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
@@ -793,6 +821,7 @@ for(int fu(0);fu<1;++fu){
 	ogl.data = pixels2;
 
 	cv::flip(ogl,ogl,0);
+	cv::imwrite("test45.bmp",ogl);
 
 	CvSize size2;
 	size2.height=1024;
@@ -1204,7 +1233,7 @@ bool	isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 	if(old_CP[0] != -1){
 		Pnt2f lineNormal2D = hitPoint-old_CP;
 		float dot = lineNormal2D[0]*lineNormal3D[0]+lineNormal2D[1]*lineNormal3D[1];
-		//cout << "cos(dot) : "<<cos(dot)<<endl;
+		cout << "cos(dot) : "<<cos(dot)<<endl;
 		if(dot < 0)
 			dot = dot * -1;
 		if(dot > 0.9){
