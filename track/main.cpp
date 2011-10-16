@@ -91,29 +91,107 @@ Pnt2d _FIX = Pnt2d(-1,0);
 Pnt2d _FIX2 = Pnt2d(-1,0);
 
 // number of controlpoints
-int _CP = 500;
+int _CP = 800;
 
 // pixel distance to the next control point
 int CHECK_PIXEL = 5;
 
 // initialization matrix
 //frame 1
-GLdouble _m[16] = {0.806114 ,0.533122 , 0.256828 ,0,
-		-0.422132,0.822216 ,-0.381792 ,0,
-		-0.41471,0.199353,0.887848,0,
-		-0.05,-1.16,-9.455,1
-
-};
-
-//frame 70
-/*GLdouble _m[16] = {0.806142 ,0.16366 , 0.568639 ,0,
-		-0.140773,0.986443 ,-0.0843392 ,0,
-		-0.574733,-0.0120595,0.818252,0,
-		0.8045,-0.556,-9.020,1
-
+/*GLdouble _m[12] = {0.631246,0.565675,0.577375,
+			-0.329972,0.857789,-0.396967,
+			-0.373709,0.126325,0.901786,
+			-0.0450096,-1.18954,-9.71075
 };*/
 
+//frame 10
+/*GLdouble _m[12] = {0.56232 ,0.431334,-0.0558146,
+		   -0.433028 ,0.910384,-0.179817,
+		   -0.398728, 0.10957,0.858766,
+		   0.0554073, -1.50217, -10.176
+};*/
 
+//frame 20
+/*GLdouble _m[12] = {0.766846 ,0.461017,0.446555,
+		   -0.374064 ,0.886392,-0.272737,
+		   -0.521559, 0.0421068,0.852176,
+		   0.10954073, -1.20217, -9.4176
+};*/
+
+//frame 30
+/*GLdouble _m[12] = {0.841008 ,0.434622,0.322193,
+		   -0.316009 ,0.878002,-0.359514,
+		   -0.439139, 0.200538,0.875752,
+		   0.20954073, -1.10217, -9.4176
+};*/
+
+// FRAME 30 - 2
+/*GLdouble _m[12] = {0.636422,0.386276,0.318426,
+		   -0.238123,0.887736,-0.378292,
+		   -0.378582,0.185245,0.868635,
+		   0.1751,-1.08458,-9.44856
+};*/
+
+/*GLdouble _m[12] = {0.665521,0.529517,0.262015,
+-0.24959,0.915267,-0.329653,
+-0.417254,0.0456434,0.950157,
+0.195404,-1.08756,-9.82492};*/
+
+// frame 40
+/*GLdouble _m[12] = {0.579824,0.349663,0.306409,
+		   -0.208275,0.932405,-0.243672,
+		   -0.519254,0.180053,0.860116,
+		   0.41866,-1.13302,-9.45541
+};*/
+
+// frame 50
+/*GLdouble _m[12] = {0.622915,0.251767,0.271177,
+		   -0.127408,0.967661,-0.254847,
+		   -0.507016,0.142846,0.958854,
+		   0.528486,-0.982229,-9.47013
+};*/
+
+//frame 60
+/*GLdouble _m[12] = {0.662915,0.231767,0.261177,
+		   -0.107408,0.9767661,-0.254847,
+		   -0.557016,0.132846,0.978854,
+		   0.568486,-0.932229,-9.47013
+};*/
+
+// frame 60 - 2
+/*GLdouble _m[12] = {0.694986,0.126102,0.253316,
+		   -0.106859,1.00134,-0.211951,
+		   -0.419851,0.159652,0.709319,
+		   0.550708,-1.00169,-9.49362
+};*/
+
+//frame 70
+GLdouble _m[12] = { 0.998101, 0.031088, 0.229531,
+		    -0.0781641, 1.01973, -0.414162,
+		    -0.365936, 0.21531, 0.959819,
+		    0.5452, -0.94568, -9.76811
+};
+
+// frame 80
+/*GLdouble _m[12] = {0.696085,0.10039,0.250712,
+		   -0.047695,1.04153,-0.112604,
+		   -0.422337,0.114725,0.56844,
+		   0.724322,-0.96737,-9.53117
+};*/
+
+// frame 90
+/*GLdouble _m[12] = {0.675858,0.0163957,0.108763,
+		   0.00743312,1.07743,-0.123585,
+		   -0.438039,0.0804241,0.574065,
+		   0.897484,-0.944038,-9.52118
+};*/
+
+// frame 100
+/*GLdouble _m[12] = {0.684464,-0.0668559,0.116231,
+		   0.0640156,1.07902,-0.133541,
+		   -0.442349,0.114661,0.580922,
+		   1.00601,-0.937953,-9.51425
+};*/
 
 int main(int argc, char *argv[])
 {/*
@@ -463,7 +541,7 @@ void reshape (int w, int h)
 	glMatrixMode (GL_PROJECTION); //set the matrix to projectio
 	glLoadIdentity();
 
-	gluPerspective (52, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
+	//gluPerspective (52, (GLfloat)w / (GLfloat)h, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
 	//glLoadIdentity();
 
 	//generated
@@ -484,15 +562,34 @@ void reshape (int w, int h)
 
 
 	float tmp_m[16];
-	for(int tmp(0);tmp<16;++tmp)
-		tmp_m[tmp] = _m[tmp];
+	tmp_m[0] = _m[0];
+	tmp_m[1] = _m[1];
+	tmp_m[2] = _m[2];
+	tmp_m[3] = 0;
 
+	tmp_m[4] = _m[3];
+	tmp_m[5] = _m[4];
+	tmp_m[6] = _m[5];
+	tmp_m[7] = 0;
+
+	tmp_m[8] = _m[6];
+	tmp_m[9] = _m[7];
+	tmp_m[10] = _m[8];
+	tmp_m[11] = 0;
+
+	tmp_m[12] = _m[9];
+	tmp_m[13] = _m[10];
+	tmp_m[14] = _m[11];
+	tmp_m[15] = 1;
+	/*for(int tmp(0);tmp<12;++tmp)
+		tmp_m[tmp] = _m[tmp];
+*/
 	glMultMatrixf(tmp_m);
 
 	glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 	glLoadIdentity();
 
-	float scalev = 1.9;
+	float scalev = 1.92;
 	glScalef(scalev,scalev,scalev);
 
 }
@@ -504,9 +601,19 @@ void display(void)
 }
 
 void renderScene(void) {
-for(int q(1);q<=10;++q)
+
+	//open file
+	fstream file;
+	stringstream filename;
+	filename << "ProjectionData_"<< time(0)<<".dat";
+
+	file.open(filename.str().c_str(),ios::out);
+
+
+for(int q(70);q<=70;++q)
 {
-for(int fu(0);fu<2;++fu){
+file << "FRAME NO. "<<q<<endl;
+for(int fu(0);fu<15;++fu){
 	int window_w = 1280;
 	int window_h = 1024;
 
@@ -740,10 +847,14 @@ for(int fu(0);fu<2;++fu){
 	stream << ".bmp";
 	/*"pics/1_1.bmp"*/
 	cout << "/*** PICTURE "<< stream.str().c_str() << " ***/"<<endl;
-	cv::Mat init_Image2 = cvLoadImage(stream.str().c_str());
-	cv::Mat original = init_Image2.clone();
-	//cv::imshow("showing image",init_Image);
-	cv::flip(init_Image2,init_Image2,0);
+
+	//cv::Mat init_Image2 = cvLoadImage(stream.str().c_str());
+
+
+	// overwrite canny with ground truth
+	cv::Mat init_Image2 = cvLoadImage("ground_truth/canny/70c.bmp");
+
+	//cv::flip(init_Image2,init_Image2,0);
 	cv::Mat gray;
 	cv::Mat init_Image;// = init_Image2.clone();
 
@@ -752,8 +863,9 @@ for(int fu(0);fu<2;++fu){
 
 	cv::Mat gaus;
 	cv::GaussianBlur(gray,gaus,cv::Size(3,3),1);
-	//cv::Sobel(gray,init_Image,init_Image.type(),1,0,3);
+	////cv::Sobel(gray,init_Image,init_Image.type(),1,0,3);
 	cv::Canny(gaus,init_Image,12,17,3,true);
+
 	vector<vector<cv::Point> > contours;
 	vector<vector<cv::Point> > new_contours;
 	cv::findContours(init_Image,contours,CV_RETR_EXTERNAL,CV_CHAIN_APPROX_NONE,cv::Point());
@@ -908,25 +1020,7 @@ for(int fu(0);fu<2;++fu){
 					cv::circle(result,cv::Point(_FIX[0],_FIX[1]),3,CV_RGB(255,255,0),2);
 					continue;
 				}
-				/*if(i==2){
-					if(_FIX2[0] == -1){
-						double x,y,z;
-						gluProject(tmp[0], tmp[1], tmp[2],
-							modelview, projection2, viewport,
-							&x,&y,&z);
-						//Pnt2d tmp2d;
-						_FIX2[0] = x;
-						_FIX2[1] = y;
 
-					//	cout << "::: "<< (_HITPOINTS[0]).size()<<endl;
-					}
-					(_HITPOINTS[1]).push_back(_FIX2);
-					cv::circle(result,cv::Point(_FIX2[0],_FIX2[1]),3,CV_RGB(255,255,0),2);
-					continue;
-				}*/
-				//cout << "::: "<< (_HITPOINTS[1]).size()<<endl;
-				//cout << "::: "<< (_HITPOINTS[0]).size()<<endl;
-				//exit(0);
 				// project to 2D
 				double x,y,z;
 				gluProject(tmp[0], tmp[1], tmp[2],
@@ -1006,7 +1100,7 @@ for(int fu(0);fu<2;++fu){
 				_CONTROLPOINTS[i].clear();
 				_HITPOINTS[i].clear();
 			}
-			cout << "REAL HITPOINTS IN LINE "<< i << " -> "<<realHP<<endl;
+			//cout << "REAL HITPOINTS IN LINE "<< i << " -> "<<realHP<<endl;
 			//cout << ":::"<<ok<<endl;
 			// clear if not enough hitpoints on line
 			if(ok < 3 && i != 0){
@@ -1033,23 +1127,31 @@ for(int fu(0);fu<2;++fu){
 	countCP = 0;
 
 	cout << "#### LEV - MAR ###"<<endl;
-	for(int v(0);v<16;++v){
-		cout << " " << projection2[v];
-		if(v%4 == 3)
+	for(int v(0);v<12;++v){
+		cout << " " << _m[v];
+		if(v%3 == 2)
 			cout <<endl;
 	}
 	cout << "================"<<endl;
 
 	int ret;
 	//for(int go(0);go <=25	; ++go)
-		ret = dlevmar_dif(mapping,_m,NULL,16,_CP,1000,NULL,NULL,NULL,NULL,NULL);
+	ret = dlevmar_dif(mapping,_m,NULL,12,_CP,1000,NULL,NULL,NULL,NULL,NULL);
+	//ret = dlevmar_dif(mapping,_m,NULL,12,_CP,1000,NULL,NULL,NULL,NULL,NULL);
 
-	for(int v(0);v<16;++v){
-		cout << " " << projection2[v];
-		if(v%4 == 3)
+	for(int v(0);v<12;++v){
+		cout << " " << _m[v];
+		//file << " " << projection2[v];
+		if(v%3 == 2){
 			cout <<endl;
+			//file <<endl;
+		}
 	}
-
+	file << _m[0] << "," << _m[1] << "," << _m[2] << endl;
+	file << _m[3] << "," << _m[4] << "," << _m[5] << endl;
+	file << _m[6] << "," << _m[7] << "," << _m[8]<< endl;
+	file << _m[9] << "," << _m[10] << "," << _m[11]<< endl;
+	file << endl;
 
 	cout <<endl;
 	cout <<"iterated for: "<<ret<<endl;
@@ -1058,9 +1160,12 @@ for(int fu(0);fu<2;++fu){
 	drawModel(result,0,0,255);
 
 	//convert gray canny image back to rgb
-	cv::cvtColor(init_Image,init_Image2,CV_GRAY2RGB);
+
+	//cv::cvtColor(init_Image,init_Image2,CV_GRAY2RGB);
+
 	// generated error image
 	//cv::add(original,result,result);
+	cv::flip(init_Image2,init_Image2,0);
 	cv::add(init_Image2,result,result);
 	// flip like hell
 	cv::flip(result,result,0);
@@ -1074,7 +1179,9 @@ for(int fu(0);fu<2;++fu){
 	_HITPOINTS.clear();
 	_LINES.clear();
 }
+file << "=====" <<endl;
 }
+file.close();
 }
 
 void drawModel(cv::Mat pic,int r,int g,int b){
@@ -1103,21 +1210,50 @@ void drawModel(cv::Mat pic,int r,int g,int b){
 
 void mapping(double *p, double *x, int m, int n, void *data)
 {
+	double max_res=-1;
+	//test save
+	//open file
+	fstream file;
+	stringstream filename;
+	filename << "huber"<< time(0)<<".dat";
+
+	file.open(filename.str().c_str(),ios::out);
+
+
 	int k;
 	GLdouble modelview[16], projection2[16];
 	GLint viewport[4];
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective (52, (GLfloat)1280 / (GLfloat)1024, 0.1, 30.0); //set the perspective (angle of sight, width, height, ,depth)
+	gluPerspective (52, (GLfloat)1280 / (GLfloat)1024, 0.1, 40.0); //set the perspective (angle of sight, width, height, ,depth)
 	float tmp_m[16];
-	for(int t(0);t<16;++t){
+	tmp_m[0] = p[0];
+	tmp_m[1] = p[1];
+	tmp_m[2] = p[2];
+	tmp_m[3] = 0;
+
+	tmp_m[4] = p[3];
+	tmp_m[5] = p[4];
+	tmp_m[6] = p[5];
+	tmp_m[7] = 0;
+
+	tmp_m[8] = p[6];
+	tmp_m[9] = p[7];
+	tmp_m[10] = p[8];
+	tmp_m[11] = 0;
+
+	tmp_m[12] = p[9];
+	tmp_m[13] = p[10];
+	tmp_m[14] = p[11];
+	tmp_m[15] = 1;
+	/*for(int t(0);t<12;++t){
 		//if(t<=7)
 		//	tmp_m[t] = 0.1*p[t];
 		//else
 			tmp_m[t] = p[t];
 
-	}
+	}*/
 
 	glMultMatrixf(tmp_m);
 	// load new matrix
@@ -1126,7 +1262,7 @@ void mapping(double *p, double *x, int m, int n, void *data)
 	glLoadIdentity();
 
 	//glMultMatrixf(m);
-	float scalev = 1.9;
+	float scalev = 1.92;
 	glScalef(scalev,scalev,scalev);
 
 	glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
@@ -1181,10 +1317,20 @@ void mapping(double *p, double *x, int m, int n, void *data)
 
 			if(count > n)
 				continue;
-			x[count] = (double)length*(double)length;
-
+			//normal caluclation
+			//x[count] = (double)length*(double)length;
+			file << (double)length * (double)length<<endl;
+			//huber calc
+			float c = 0.5;
+			//cout << "l:"<<length<<endl;
+			if(length <= c){
+				x[count] = ((double)length * (double)length ) / 2 ;
+				file << ((double)length * (double)length ) / 2<<endl;
+			} else {
+				x[count] = c * (double)length - (c * c) / 2;
+				file << c * (double)length - (c * c) / 2 << endl;
+			}
 			count++;
-
 		}
 		if(count < n && i>=thres){
 			cout << "dammit...not enough points...start over!!"<<endl;
@@ -1193,6 +1339,7 @@ void mapping(double *p, double *x, int m, int n, void *data)
 		hitpoints.clear();
 		cps.clear();
 	}
+	file.close();
 	    //exit(0);
 }
 
@@ -1203,7 +1350,7 @@ bool	isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 	//cout << length<<endl;
 
-	int test = 10;
+	int test = 20;
 	//if(controlPoint[1] > 240)
 	//	test = 15;
 
@@ -1212,10 +1359,10 @@ bool	isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 		return true;
 	}
 
-	if(old_CP[0] != -1){
+	/*if(old_CP[0] != -1){
 		Pnt2f lineNormal2D = hitPoint-old_CP;
 		float dot = lineNormal2D[0]*lineNormal3D[0]+lineNormal2D[1]*lineNormal3D[1];
-		cout << "cos(dot) : "<<cos(dot)<<endl;
+		//cout << "cos(dot) : "<<cos(dot)<<endl;
 		if(dot < 0)
 			dot = dot * -1;
 		if(dot > 0.9){
@@ -1224,7 +1371,7 @@ bool	isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 		}
 	} else {
 		return true;
-	}
+	}*/
 	//cout << "!!! "<<hitPoint.dist(old_CP)<<endl;
 	//if(hitPoint.dist(old_CP) <1.1)
 	//	return true;
@@ -1245,7 +1392,7 @@ Pnt2f checkNormal(Pnt2d controlPoint, Pnt2f normal, cv::Mat picture){
 		i++;
 		Pnt2f tmp;
 		tmp[0]= controlPoint[0] + normal[0] * 0.01 * i;
-		tmp[1]=controlPoint[1] + normal[1]* 0.01 * i;
+		tmp[1]=controlPoint[1] + normal[1] * 0.01 * i;
 		if(x == (int)tmp[0] && y == (int)tmp[1])
 			continue;
 		x = (int) tmp[0];
@@ -1441,10 +1588,10 @@ void createFixPoints(){
 		vec.push_back(Pnt3f(-0.141,-1.263,0.227));
 	}
 	_CONTROLPOINTS[0] = vec;
-	for(int i(0);i<50;++i){
+	/*for(int i(0);i<50;++i){
 		vec.push_back(Pnt3f(-0.141,-1.263,-0.227));
 	}
-	_CONTROLPOINTS[1] = vec;
+	_CONTROLPOINTS[1] = vec;*/
 }
 
 void sortLines3D(int thres){
@@ -1495,9 +1642,9 @@ void sortLines3D(int thres){
 		else if(i < lineNumber*2)
 			createControlPoints(i,_LINES[i],_LINES[i+1],3);
 		else if(i>_LINES.size()-lineNumber)
-			createControlPoints(i,_LINES[i],_LINES[i+1],3);
+			createControlPoints(i,_LINES[i],_LINES[i+1],4);
 		else
-			createControlPoints(i,_LINES[i],_LINES[i+1],2);
+			createControlPoints(i,_LINES[i],_LINES[i+1],3);
 		//i =old_i;
 		// check number of CP per line
 		//cout << "line "<<i<< " no: " << _CONTROLPOINTS[i].size()<<endl;
