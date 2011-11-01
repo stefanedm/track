@@ -21,6 +21,7 @@ QMAKE_LFLAGS += -F/System/Library/Frameworks/
 LIBS += -framework GLUT
 LIBS += -framework OpenGL
 LIBS += -framework Cocoa
+LIBS += -framework Accelerate
 
 #AR TOOLKIT
 LIBS += /usr/local/lib/AR/libAR.a
@@ -29,6 +30,8 @@ LIBS += /usr/local/lib/AR/libARgsub.a
 LIBS += /usr/local/lib/AR/libARmulti.a
 LIBS += /usr/local/lib/AR/libARgsubUtil.a
 LIBS += /usr/local/lib/AR/libARgsub_lite.a
+
+LIBS += /usr/local/lib/liblevmar.a
 
 #ADDING OSG LIBS
 LIBS += /usr/local/lib/dbg/libOSGBase.dylib
