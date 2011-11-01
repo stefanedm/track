@@ -94,14 +94,14 @@ Pnt2d _FIX2 = Pnt2d(-1,0);
 int _CP = 800;
 
 // pixel distance to the next control point
-int CHECK_PIXEL = 5;
+int CHECK_PIXEL = 15;
 
 // initialization matrix
 //frame 1
-/*GLdouble _m[12] = {0.631246,0.565675,0.577375,
-			-0.329972,0.857789,-0.396967,
-			-0.373709,0.126325,0.901786,
-			-0.0450096,-1.18954,-9.71075
+/*GLdouble _m[12] = { 0.892563,0.258688,0.857697,
+		    -0.386775,1.00967,-0.475882,
+		    -0.307668,0.112639,0.893848,
+		    -0.243351,-1.00387,-10.1181
 };*/
 
 //frame 10
@@ -116,13 +116,18 @@ int CHECK_PIXEL = 5;
 		   -0.374064 ,0.886392,-0.272737,
 		   -0.521559, 0.0421068,0.852176,
 		   0.10954073, -1.20217, -9.4176
-};*/
-
+};
+*/
 //frame 30
 /*GLdouble _m[12] = {0.841008 ,0.434622,0.322193,
 		   -0.316009 ,0.878002,-0.359514,
 		   -0.439139, 0.200538,0.875752,
 		   0.20954073, -1.10217, -9.4176
+};*/
+/*GLdouble _m[12] = {0.733921,0.580986,0.553705,
+		   -0.294421,1.01429,-0.261679,
+		   -0.395801,0.210083,0.687961,
+		   0.207058,-1.23651,-9.67958
 };*/
 
 // FRAME 30 - 2
@@ -135,8 +140,8 @@ int CHECK_PIXEL = 5;
 /*GLdouble _m[12] = {0.665521,0.529517,0.262015,
 -0.24959,0.915267,-0.329653,
 -0.417254,0.0456434,0.950157,
-0.195404,-1.08756,-9.82492};*/
-
+0.195404,-1.08756,-9.82492};
+*/
 // frame 40
 /*GLdouble _m[12] = {0.579824,0.349663,0.306409,
 		   -0.208275,0.932405,-0.243672,
@@ -150,7 +155,12 @@ int CHECK_PIXEL = 5;
 		   -0.507016,0.142846,0.958854,
 		   0.528486,-0.982229,-9.47013
 };*/
-
+/*GLdouble _m[12] = {
+	0.760413,0.210032,0.169259,
+	-0.249757,0.926865,-0.333332,
+	-0.458418,0.22712,1.03501,
+	0.20769,-1.10942,-9.60008
+};*/
 //frame 60
 /*GLdouble _m[12] = {0.662915,0.231767,0.261177,
 		   -0.107408,0.9767661,-0.254847,
@@ -166,11 +176,11 @@ int CHECK_PIXEL = 5;
 };*/
 
 //frame 70
-GLdouble _m[12] = { 0.998101, 0.031088, 0.229531,
+/*GLdouble _m[12] = { 0.998101, 0.031088, 0.229531,
 		    -0.0781641, 1.01973, -0.414162,
 		    -0.365936, 0.21531, 0.959819,
 		    0.5452, -0.94568, -9.76811
-};
+};*/
 
 // frame 80
 /*GLdouble _m[12] = {0.696085,0.10039,0.250712,
@@ -187,11 +197,11 @@ GLdouble _m[12] = { 0.998101, 0.031088, 0.229531,
 };*/
 
 // frame 100
-/*GLdouble _m[12] = {0.684464,-0.0668559,0.116231,
+GLdouble _m[12] = {0.684464,-0.0668559,0.116231,
 		   0.0640156,1.07902,-0.133541,
 		   -0.442349,0.114661,0.580922,
 		   1.00601,-0.937953,-9.51425
-};*/
+};
 
 int main(int argc, char *argv[])
 {/*
@@ -589,7 +599,8 @@ void reshape (int w, int h)
 	glMatrixMode (GL_MODELVIEW); //set the matrix back to model
 	glLoadIdentity();
 
-	float scalev = 1.92;
+	//float scalev = 1.92;
+	float scalev = 0.6;
 	glScalef(scalev,scalev,scalev);
 
 }
@@ -610,10 +621,24 @@ void renderScene(void) {
 	file.open(filename.str().c_str(),ios::out);
 
 
-for(int q(70);q<=70;++q)
+for(int q(100);q>=50;--q)
 {
 file << "FRAME NO. "<<q<<endl;
-for(int fu(0);fu<15;++fu){
+for(int fu(0);fu<2;++fu){
+	/*if(_m[0]<1)
+		_m[0] += 0.1;
+	else
+		_m[0] = 0.99;*/
+/*
+	if(_m[4]<1)
+		_m[4] += 0.10;
+	else
+		_m[4] = 0.99;
+
+	if(_m[8]<1)
+		_m[8] += 0.10;
+	else
+		_m[8] = 0.99;*/
 	int window_w = 1280;
 	int window_h = 1024;
 
@@ -766,8 +791,8 @@ for(int fu(0);fu<15;++fu){
 				if(b == a2 || b == b2 || b == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						count_lines_drawn++;
-						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
-						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
+						//glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
+						//glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
 						_LINES.push_back(fit.getPosition(0));
 						_LINES.push_back(fit.getPosition(1));
 						//createControlPoints(_LINES.size()-2,fit.getPosition(0),fit.getPosition(1));
@@ -779,8 +804,8 @@ for(int fu(0);fu<15;++fu){
 				if(c == a2 || c == b2 || c == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						count_lines_drawn++;
-						glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
-						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
+						//glVertex3f(fit.getPosition(0)[0],fit.getPosition(0)[1],fit.getPosition(0)[2]);
+						//glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
 						_LINES.push_back(fit.getPosition(0));
 						_LINES.push_back(fit.getPosition(2));
 						//createControlPoints(_LINES.size()-2,fit.getPosition(0),fit.getPosition(2));
@@ -792,8 +817,8 @@ for(int fu(0);fu<15;++fu){
 				if(b == a2 || b == b2 || b == c2){
 					if(fit.getNormal(0).dot(nit.getNormal(0)) < thresh){
 						count_lines_drawn++;
-						glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
-						glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
+						//glVertex3f(fit.getPosition(1)[0],fit.getPosition(1)[1],fit.getPosition(1)[2]);
+						//glVertex3f(fit.getPosition(2)[0],fit.getPosition(2)[1],fit.getPosition(2)[2]);
 						_LINES.push_back(fit.getPosition(1));
 						_LINES.push_back(fit.getPosition(2));
 						//createControlPoints(_LINES.size()-2,fit.getPosition(1),fit.getPosition(2));
@@ -848,13 +873,12 @@ for(int fu(0);fu<15;++fu){
 	/*"pics/1_1.bmp"*/
 	cout << "/*** PICTURE "<< stream.str().c_str() << " ***/"<<endl;
 
-	//cv::Mat init_Image2 = cvLoadImage(stream.str().c_str());
-
+	cv::Mat init_Image2 = cvLoadImage(stream.str().c_str());
+	cv::flip(init_Image2,init_Image2,0);
 
 	// overwrite canny with ground truth
-	cv::Mat init_Image2 = cvLoadImage("ground_truth/canny/70c.bmp");
+	//cv::Mat init_Image2 = cvLoadImage("ground_truth/canny/30c.bmp");
 
-	//cv::flip(init_Image2,init_Image2,0);
 	cv::Mat gray;
 	cv::Mat init_Image;// = init_Image2.clone();
 
@@ -864,7 +888,7 @@ for(int fu(0);fu<15;++fu){
 	cv::Mat gaus;
 	cv::GaussianBlur(gray,gaus,cv::Size(3,3),1);
 	////cv::Sobel(gray,init_Image,init_Image.type(),1,0,3);
-	cv::Canny(gaus,init_Image,12,17,3,true);
+	cv::Canny(gaus,init_Image,5,10,3,true);
 
 	vector<vector<cv::Point> > contours;
 	vector<vector<cv::Point> > new_contours;
@@ -880,7 +904,7 @@ for(int fu(0);fu<15;++fu){
 		float length = sqrt((start.x-end.x)*(start.x-end.x)+(start.y-end.y)*(start.y-end.y));
 
 		//check contours size
-		if(contours[c].size()>20 && (size-10 < length < size+10)){
+		if(contours[c].size()>20 /* && (size-10 < length < size+10)*/){
 
 			for(int c1(0);c1<contours[c].size();++c1){
 				cv::Point tmp = (contours[c])[c1];
@@ -991,7 +1015,7 @@ for(int fu(0);fu<15;++fu){
 		normal2[0]=lineNormal[1]/l;normal2[1]=-lineNormal[0]/l;
 
 		// draw line
-		cv::line(result,cv::Point(tx1,ty1),cv::Point(tx2,ty2),CV_RGB(255,0,0),1);
+		//cv::line(result,cv::Point(tx1,ty1),cv::Point(tx2,ty2),CV_RGB(255,0,0),1);
 
 		//creating 2d controlpoints
 		//float t = createControlPoints2D(i,p1,p2);
@@ -1055,26 +1079,26 @@ for(int fu(0);fu<15;++fu){
 					ok++;
 					if(!outlier && !outlier2){
 						if(tmp2d.dist(hit)<tmp2d.dist(hit1)){
-							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(0,255,0),1);
+							//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(0,255,0),1);
 							(_HITPOINTS[i]).push_back(hit);
 							old_hit = hit;
 							//cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(0,255,255),3);
 						}
 						else{
-							cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(0,255,0),1);
+							//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(0,255,0),1);
 							(_HITPOINTS[i]).push_back(hit1);
 							old_hit = hit1;
 							//cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,255),3);
 						}
 					} else if(!outlier){
 						(_HITPOINTS[i]).push_back(hit);
-						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(0,255,0),1);
+						//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit[0],hit[1]),CV_RGB(0,255,0),1);
 						old_hit = hit;
 						//cv::circle(result,cv::Point(hit1[0],hit1[1]),2,CV_RGB(0,255,255),3);
 						}
 						else {
 						(_HITPOINTS[i]).push_back(hit1);
-						cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(0,255,0),1);
+						//cv::line(result,cv::Point(tmp2d[0],tmp2d[1]),cv::Point(hit1[0],hit1[1]),CV_RGB(0,255,0),1);
 						old_hit = hit1;
 						//cv::circle(result,cv::Point(hit[0],hit[1]),2,CV_RGB(0,255,255),3);
 						}
@@ -1217,7 +1241,7 @@ void mapping(double *p, double *x, int m, int n, void *data)
 	stringstream filename;
 	filename << "huber"<< time(0)<<".dat";
 
-	file.open(filename.str().c_str(),ios::out);
+	//file.open(filename.str().c_str(),ios::out);
 
 
 	int k;
@@ -1318,18 +1342,18 @@ void mapping(double *p, double *x, int m, int n, void *data)
 			if(count > n)
 				continue;
 			//normal caluclation
-			//x[count] = (double)length*(double)length;
-			file << (double)length * (double)length<<endl;
+			x[count] = (double)length*(double)length;
+			//file << (double)length * (double)length<<endl;
 			//huber calc
 			float c = 0.5;
 			//cout << "l:"<<length<<endl;
-			if(length <= c){
+			/*if(length <= c){
 				x[count] = ((double)length * (double)length ) / 2 ;
 				file << ((double)length * (double)length ) / 2<<endl;
 			} else {
 				x[count] = c * (double)length - (c * c) / 2;
 				file << c * (double)length - (c * c) / 2 << endl;
-			}
+			}*/
 			count++;
 		}
 		if(count < n && i>=thres){
@@ -1339,7 +1363,7 @@ void mapping(double *p, double *x, int m, int n, void *data)
 		hitpoints.clear();
 		cps.clear();
 	}
-	file.close();
+	//file.close();
 	    //exit(0);
 }
 
@@ -1350,7 +1374,7 @@ bool	isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 	float length = sqrt(vec[0]*vec[0] + vec[1]*vec[1]);
 	//cout << length<<endl;
 
-	int test = 20;
+	int test = 10;
 	//if(controlPoint[1] > 240)
 	//	test = 15;
 
@@ -1359,7 +1383,7 @@ bool	isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 		return true;
 	}
 
-	/*if(old_CP[0] != -1){
+	if(old_CP[0] != -1){
 		Pnt2f lineNormal2D = hitPoint-old_CP;
 		float dot = lineNormal2D[0]*lineNormal3D[0]+lineNormal2D[1]*lineNormal3D[1];
 		//cout << "cos(dot) : "<<cos(dot)<<endl;
@@ -1371,7 +1395,7 @@ bool	isOutlier(Pnt2f controlPoint, Pnt2f hitPoint,Pnt2f lineNormal3D, Pnt2f old_
 		}
 	} else {
 		return true;
-	}*/
+	}
 	//cout << "!!! "<<hitPoint.dist(old_CP)<<endl;
 	//if(hitPoint.dist(old_CP) <1.1)
 	//	return true;
@@ -1642,7 +1666,7 @@ void sortLines3D(int thres){
 		else if(i < lineNumber*2)
 			createControlPoints(i,_LINES[i],_LINES[i+1],3);
 		else if(i>_LINES.size()-lineNumber)
-			createControlPoints(i,_LINES[i],_LINES[i+1],4);
+			createControlPoints(i,_LINES[i],_LINES[i+1],3);
 		else
 			createControlPoints(i,_LINES[i],_LINES[i+1],3);
 		//i =old_i;
